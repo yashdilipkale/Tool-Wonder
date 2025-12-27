@@ -2,6 +2,8 @@
 
 **Your Daily Tools, All in One Place**
 
+![Landing Page](./assets/landing-page.png)
+
 ToolsWonder is a comprehensive web application that provides a wide range of online tools and utilities to simplify your daily tasks. From image editing and document conversion to calculations, text processing, and developer utilities, everything you need is available in one convenient location.
 
 ## 🚀 Features
@@ -13,7 +15,6 @@ ToolsWonder offers over 35+ tools organized into the following categories:
 - Image Compressor
 - Image Resizer
 - Image Cropper
-- Image to Text (OCR)
 - Image Rotator
 
 ### 📄 Document Tools
