@@ -120,9 +120,10 @@ ToolsWonder offers over 35+ tools organized into the following categories:
    cd backend
    node server.js
    ```
+   The backend server will run on port 3001.
 
 6. **Open your browser:**
-   Navigate to `http://localhost:5173` (default Vite port)
+   Navigate to `http://localhost:3000`
 
 ## 🚀 Usage
 
