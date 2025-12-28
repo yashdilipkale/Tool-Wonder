@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Search, ChevronUp } from 'lucide-react';
+import { gsap } from 'gsap';
 import { AuthProvider } from './AuthContext';
 import { ThemeProvider } from './ThemeContext';
 import Header from './components/Header';
@@ -14,6 +15,44 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfUse from './components/TermsOfUse';
 import { CATEGORIES, TOOLS } from './data';
 import { CategoryDefinition, Tool } from './types';
+
+// ToolGrid Component with GSAP Animations
+const ToolGrid: React.FC<{ tools: Tool[] }> = ({ tools }) => {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const cards = gridRef.current?.querySelectorAll('.tool-card');
+    if (!cards) return;
+
+    // Set initial states
+    gsap.set(cards, {
+      opacity: 0,
+      y: 30,
+      scale: 0.95
+    });
+
+    // Animate cards with stagger
+    gsap.to(cards, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "back.out(1.7)",
+      delay: 0.2
+    });
+  }, [tools]);
+
+  return (
+    <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {tools.map((tool) => (
+        <div key={tool.id} className="tool-card">
+          <ToolCard tool={tool} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +112,7 @@ function App() {
                 </section>
 
                 {/* Content Area */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 scroll-mt-28" id="tools">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pb-24 scroll-mt-28" id="tools">
 
                   {searchQuery ? (
                     /* Search Results View */
@@ -88,11 +127,7 @@ function App() {
                       </div>
 
                       {filteredData && filteredData.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {filteredData.map(tool => (
-                            <ToolCard key={tool.id} tool={tool} />
-                          ))}
-                        </div>
+                        <ToolGrid tools={filteredData} />
                       ) : (
                         <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                           <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-300">
@@ -122,11 +157,7 @@ function App() {
                               <p className="text-slate-500 dark:text-slate-400 text-lg">{category.description}</p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {categoryTools.map((tool) => (
-                                <ToolCard key={tool.id} tool={tool} />
-                              ))}
-                            </div>
+                            <ToolGrid tools={categoryTools} />
                           </section>
                         );
                       })}

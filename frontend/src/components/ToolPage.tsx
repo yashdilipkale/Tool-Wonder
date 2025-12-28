@@ -29,7 +29,7 @@ import TextEncryptor from './TextEncryptor';
 import CodeMinifier from './CodeMinifier';
 import JSONFormatter from './JSONFormatter';
 import Base64Converter from './Base64Converter';
-import URLEncoder from './URLEncoder';
+
 import ColorConverter from './ColorConverter';
 import RegexTester from './RegexTester';
 import ImageColorPicker from './ImageColorPicker';
@@ -38,12 +38,39 @@ import ContrastChecker from './ContrastChecker';
 import PaletteGenerator from './PaletteGenerator';
 import KeywordDensity from './KeywordDensity';
 import MetaTagAnalyzer from './MetaTagAnalyzer';
+import TextSummarizer from './TextSummarizer';
+import GrammarChecker from './GrammarChecker';
+import TranslationTool from './TranslationTool';
+import FindReplace from './FindReplace';
+import TextDiffChecker from './TextDiffChecker';
+import TextExtractor from './TextExtractor';
+import TextMerger from './TextMerger';
+import CodeFormatter from './CodeFormatter';
+import ApiTester from './ApiTester';
+import DatabaseQueryBuilder from './DatabaseQueryBuilder';
+import CSSMinifier from './CSSMinifier';
+import HashGenerator from './HashGenerator';
+import CronGenerator from './CronGenerator';
+import ProfessionalColorPalettes from './ProfessionalColorPalettes';
+import BacklinkChecker from './BacklinkChecker';
+import KeywordResearch from './KeywordResearch';
+import WebsiteSpeedAnalyzer from './WebsiteSpeedAnalyzer';
 import QRCodeGenerator from './QRCodeGenerator';
 import BarcodeGenerator from './BarcodeGenerator';
 import UUIDGenerator from './UUIDGenerator';
 import UnitConverter from './UnitConverter';
 import TimeZoneConverter from './TimeZoneConverter';
 import PasswordGenerator from './PasswordGenerator';
+import AdvancedPasswordManager from './AdvancedPasswordManager';
+import FileEncryption from './FileEncryption';
+import DataBackupTool from './DataBackupTool';
+import MorseCodeConverter from './MorseCodeConverter';
+import BinaryConverter from './BinaryConverter';
+import InvestmentCalculator from './InvestmentCalculator';
+import TipCalculator from './TipCalculator';
+import PercentageCalculator from './PercentageCalculator';
+import SalesTaxCalculator from './SalesTaxCalculator';
+import FuelCostCalculator from './FuelCostCalculator';
 
 
 const ToolPage: React.FC = () => {
@@ -64,8 +91,8 @@ const ToolPage: React.FC = () => {
   const Icon = tool.icon;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-4 md:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -146,14 +173,25 @@ const ToolPage: React.FC = () => {
           <CodeMinifier />
         ) : tool.id === 'dev-json' ? (
           <JSONFormatter />
-        ) : tool.id === 'dev-b64' ? (
+        ) : tool.id === 'util-base64' ? (
           <Base64Converter />
-        ) : tool.id === 'dev-url' ? (
-          <URLEncoder />
+
         ) : tool.id === 'dev-col' ? (
           <ColorConverter />
         ) : tool.id === 'dev-reg' ? (
           <RegexTester />
+        ) : tool.id === 'dev-fmt' ? (
+          <CodeFormatter />
+        ) : tool.id === 'dev-api' ? (
+          <ApiTester />
+        ) : tool.id === 'dev-db' ? (
+          <DatabaseQueryBuilder />
+        ) : tool.id === 'dev-css' ? (
+          <CSSMinifier />
+        ) : tool.id === 'dev-hash' ? (
+          <HashGenerator />
+        ) : tool.id === 'dev-cron' ? (
+          <CronGenerator />
         ) : tool.id === 'col-pick' ? (
           <ImageColorPicker />
         ) : tool.id === 'col-grad' ? (
@@ -162,10 +200,32 @@ const ToolPage: React.FC = () => {
           <ContrastChecker />
         ) : tool.id === 'col-pal' ? (
           <PaletteGenerator />
+        ) : tool.id === 'col-pro' ? (
+          <ProfessionalColorPalettes />
         ) : tool.id === 'seo-kw' ? (
           <KeywordDensity />
         ) : tool.id === 'seo-meta' ? (
           <MetaTagAnalyzer />
+        ) : tool.id === 'seo-back' ? (
+          <BacklinkChecker />
+        ) : tool.id === 'seo-key' ? (
+          <KeywordResearch />
+        ) : tool.id === 'seo-speed' ? (
+          <WebsiteSpeedAnalyzer />
+        ) : tool.id === 'txt-summ' ? (
+          <TextSummarizer />
+        ) : tool.id === 'txt-gram' ? (
+          <GrammarChecker />
+        ) : tool.id === 'txt-trans' ? (
+          <TranslationTool />
+        ) : tool.id === 'txt-find' ? (
+          <FindReplace />
+        ) : tool.id === 'txt-diff' ? (
+          <TextDiffChecker />
+        ) : tool.id === 'txt-extract' ? (
+          <TextExtractor />
+        ) : tool.id === 'txt-merge' ? (
+          <TextMerger />
         ) : tool.id === 'util-qr' ? (
           <QRCodeGenerator />
         ) : tool.id === 'util-bar' ? (
@@ -178,6 +238,26 @@ const ToolPage: React.FC = () => {
           <TimeZoneConverter />
         ) : tool.id === 'util-pass' ? (
           <PasswordGenerator />
+        ) : tool.id === 'util-pass-mgr' ? (
+          <AdvancedPasswordManager />
+        ) : tool.id === 'util-file-enc' ? (
+          <FileEncryption />
+        ) : tool.id === 'util-backup' ? (
+          <DataBackupTool />
+        ) : tool.id === 'util-morse' ? (
+          <MorseCodeConverter />
+        ) : tool.id === 'util-binary' ? (
+          <BinaryConverter />
+        ) : tool.id === 'calc-invest' ? (
+          <InvestmentCalculator />
+        ) : tool.id === 'calc-tip' ? (
+          <TipCalculator />
+        ) : tool.id === 'calc-percent' ? (
+          <PercentageCalculator />
+        ) : tool.id === 'calc-sales' ? (
+          <SalesTaxCalculator />
+        ) : tool.id === 'calc-fuel' ? (
+          <FuelCostCalculator />
         ) : tool.id === 'doc-fmt' ? (
           <FormatConverter />
         ) : tool.id === 'pdf-lock' ? (

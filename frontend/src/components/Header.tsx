@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Terminal, Mail, Sun, Moon, User, LogOut } from 'lucide-react';
+import { Menu, X, Terminal, Mail, Sun, Moon, User, LogOut, Zap } from 'lucide-react';
 import { useTheme } from '../ThemeContext';
 import { useAuth } from '../AuthContext';
+
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
 
@@ -37,11 +39,19 @@ const Header: React.FC = () => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <a href="#" className="flex items-center gap-3 group">
-              <img
-                src="/tools-wonder-logo.svg"
-                alt="ToolsWonder Logo"
-                className="h-12 w-auto group-hover:scale-105 transition-transform"
-              />
+              <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-105">
+                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:bg-primary-700 group-hover:rotate-12">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transition-transform duration-300 group-hover:scale-110">
+                    <path d="M14.7 6.3a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 1.4 1.4l4-4a1 1 0 0 0 0-1.4z" fill="white"/>
+                    <path d="M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" fill="white"/>
+                    <circle cx="12" cy="18" r="1" fill="#2563eb"/>
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-primary-600">Tools<span className="text-primary-600">Wonder</span></span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">by yash</span>
+                </div>
+              </div>
             </a>
 
             {/* Desktop Nav */}
@@ -170,14 +180,17 @@ const Header: React.FC = () => {
             ))}
           </ul>
 
+
+
           {/* Mobile Authentication */}
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
             {user ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                   <User size={20} className="text-slate-500" />
                   <span className="text-slate-800 dark:text-slate-100 font-medium">{user.name}</span>
                 </div>
+
                 <button
                   onClick={() => {
                     logout();
@@ -217,6 +230,8 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+
+
     </>
   );
 };

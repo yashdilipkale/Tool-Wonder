@@ -9,9 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "better-auth": "^1.4.9",
     "clean-css": "^5.3.3",
+    "drizzle-orm": "^0.45.1",
+    "gsap": "^3.14.2",
     "html-minifier-terser": "^7.2.0",
     "lucide-react": "^0.562.0",
+    "mysql2": "^3.16.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.11.0",

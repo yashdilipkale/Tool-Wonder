@@ -8,6 +8,7 @@ export interface Tool {
   category: ToolCategory;
   isNew?: boolean;
   isPopular?: boolean;
+  isPremium?: boolean;
 }
 
 export type ToolCategory = 
@@ -26,4 +27,15 @@ export interface CategoryDefinition {
   description: string;
   icon: LucideIcon;
   bgColor: string; // Tailwind class
+}
+
+export interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  interval: string;
+  features: string[];
+  description?: string;
+  popular?: boolean;
 }

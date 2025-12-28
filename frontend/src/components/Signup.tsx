@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import Header from './Header';
 import Footer from './Footer';
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{email?: string; password?: string; general?: string}>({});
-  const [touched, setTouched] = useState<{email?: boolean; password?: boolean}>({});
-  const { login, loading } = useAuth();
+const Signup: React.FC = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<{name?: string; email?: string; password?: string; confirmPassword?: string; general?: string}>({});
+  const [touched, setTouched] = useState<{name?: boolean; email?: boolean; password?: boolean; confirmPassword?: boolean}>({});
+  const { signup, loading } = useAuth();
   const navigate = useNavigate();
+
+  const validateName = (name: string) => {
+    if (!name) return 'Name is required';
+    if (name.length < 2) return 'Name must be at least 2 characters long';
+    if (!/^[a-zA-Z\s]+$/.test(name)) return 'Name can only contain letters and spaces';
+    return '';
+  };
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +31,25 @@ const Login: React.FC = () => {
 
   const validatePassword = (password: string) => {
     if (!password) return 'Password is required';
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
     return '';
+  };
+
+  const validateConfirmPassword = (confirmPassword: string, password: string) => {
+    if (!confirmPassword) return 'Please confirm your password';
+    if (confirmPassword !== password) return 'Passwords do not match';
+    return '';
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    if (touched.name) {
+      setErrors(prev => ({ ...prev, name: validateName(value) }));
+    }
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +66,22 @@ const Login: React.FC = () => {
     if (touched.password) {
       setErrors(prev => ({ ...prev, password: validatePassword(value) }));
     }
+    if (touched.confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: validateConfirmPassword(confirmPassword, value) }));
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    if (touched.confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: validateConfirmPassword(value, password) }));
+    }
+  };
+
+  const handleNameBlur = () => {
+    setTouched(prev => ({ ...prev, name: true }));
+    setErrors(prev => ({ ...prev, name: validateName(name) }));
   };
 
   const handleEmailBlur = () => {
@@ -51,24 +94,31 @@ const Login: React.FC = () => {
     setErrors(prev => ({ ...prev, password: validatePassword(password) }));
   };
 
+  const handleConfirmPasswordBlur = () => {
+    setTouched(prev => ({ ...prev, confirmPassword: true }));
+    setErrors(prev => ({ ...prev, confirmPassword: validateConfirmPassword(confirmPassword, password) }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ email: true, password: true });
+    setTouched({ name: true, email: true, password: true, confirmPassword: true });
 
+    const nameError = validateName(name);
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
+    const confirmPasswordError = validateConfirmPassword(confirmPassword, password);
 
-    setErrors({ email: emailError, password: passwordError });
+    setErrors({ name: nameError, email: emailError, password: passwordError, confirmPassword: confirmPasswordError });
 
-    if (emailError || passwordError) {
+    if (nameError || emailError || passwordError || confirmPasswordError) {
       return;
     }
 
-    const success = await login(email, password);
+    const success = await signup(name, email, password);
     if (success) {
       navigate('/');
     } else {
-      setErrors({ general: 'Invalid email or password. Please try again.' });
+      setErrors({ general: 'Failed to create account. Please try again.' });
     }
   };
 
@@ -80,13 +130,13 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mb-4">
-              <Mail className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+              <User className="w-8 h-8 text-primary-600 dark:text-primary-400" />
             </div>
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-              Sign in to your account
+              Create your account
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Welcome back to ToolsWonder
+              Join ToolsWonder and start using our tools
             </p>
           </div>
 
@@ -94,6 +144,34 @@ const Login: React.FC = () => {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                      errors.name ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={handleNameChange}
+                    onBlur={handleNameBlur}
+                  />
+                  {errors.name && touched.name && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Email address
@@ -134,18 +212,46 @@ const Login: React.FC = () => {
                     id="password"
                     name="password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     required
                     className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                       errors.password ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
-                    placeholder="Enter your password"
+                    placeholder="Create a password"
                     value={password}
                     onChange={handlePasswordChange}
                     onBlur={handlePasswordBlur}
                   />
                   {errors.password && touched.password && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                      errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                    }`}
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={handleConfirmPasswordChange}
+                    onBlur={handleConfirmPasswordBlur}
+                  />
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
                   )}
                 </div>
               </div>
@@ -166,11 +272,11 @@ const Login: React.FC = () => {
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Signing in...
+                    Creating account...
                   </>
                 ) : (
                   <>
-                    Sign in
+                    Create account
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -179,12 +285,12 @@ const Login: React.FC = () => {
 
             <div className="text-center">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <Link
-                  to="/signup"
+                  to="/login"
                   className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
-                  Sign up
+                  Sign in
                 </Link>
               </p>
             </div>
@@ -197,4 +303,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Signup;

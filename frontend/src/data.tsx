@@ -2,12 +2,12 @@ import {
   Image, FileText, Calculator, Type, Code, Palette, Search, Wrench,
   Maximize, Minimize, Crop, ScanText, RefreshCcw, File, FileArchive,
   Scissors, Lock, PenTool, Sigma, Calendar, Activity, Home, Percent,
-  Coins, AlignLeft, List, Scissors as ScissorsIcon, SortAsc,
-  ArrowRightLeft, Lock as LockIcon, FileCode, Brackets, Database,
-  Link, Pipette, Regex, Eye, Grid, Layers, BarChart, Tag, QrCode,
-  Barcode, Fingerprint, Ruler, Globe, Shuffle
+  Coins, AlignLeft, List, SortAsc, ArrowRightLeft, Lock as LockIcon,
+  FileCode, Brackets, Database, Link, Pipette, Regex, Eye, Layers,
+  Grid, BarChart, Tag, QrCode, Barcode, Fingerprint, Ruler, Globe,
+  Shuffle, Zap
 } from 'lucide-react';
-import { CategoryDefinition, Tool } from './types';
+import { CategoryDefinition, Tool, PricingPlan } from './types';
 
 export const CATEGORIES: CategoryDefinition[] = [
   {
@@ -68,6 +68,8 @@ export const CATEGORIES: CategoryDefinition[] = [
   }
 ];
 
+
+
 export const TOOLS: Tool[] = [
   // Image Tools
   { id: 'img-conv', name: 'Image Converter', description: 'Convert between JPG, PNG, GIF, WEBP formats', icon: ArrowRightLeft, category: 'image', isPopular: true },
@@ -92,6 +94,11 @@ export const TOOLS: Tool[] = [
   { id: 'calc-emi', name: 'Loan EMI Calculator', description: 'Calculate monthly loan installments', icon: Home, category: 'calculator' },
   { id: 'calc-gst', name: 'GST Calculator', description: 'Calculate Goods and Services Tax', icon: Percent, category: 'calculator' },
   { id: 'calc-curr', name: 'Currency Converter', description: 'Real-time global currency conversion', icon: Coins, category: 'calculator', isPopular: true },
+  { id: 'calc-invest', name: 'Investment Calculator', description: 'Analyze portfolio performance and investments', icon: Activity, category: 'calculator' },
+  { id: 'calc-tip', name: 'Tip Calculator', description: 'Calculate tips and split bills easily', icon: Coins, category: 'calculator' },
+  { id: 'calc-percent', name: 'Percentage Calculator', description: 'Calculate percentages, increases, and decreases', icon: Percent, category: 'calculator' },
+  { id: 'calc-sales', name: 'Sales Tax Calculator', description: 'Calculate sales tax for different regions', icon: Calculator, category: 'calculator' },
+  { id: 'calc-fuel', name: 'Fuel Cost Calculator', description: 'Calculate fuel costs and efficiency', icon: Activity, category: 'calculator' },
 
   // Text Tools
   { id: 'txt-case', name: 'Text Case Converter', description: 'Change text to uppercase, lowercase, title case', icon: Type, category: 'text' },
@@ -100,24 +107,38 @@ export const TOOLS: Tool[] = [
   { id: 'txt-sort', name: 'Text Sorter', description: 'Sort list items alphabetically or numerically', icon: SortAsc, category: 'text' },
   { id: 'txt-rev', name: 'Text Reverser', description: 'Reverse text, words, or character order', icon: ArrowRightLeft, category: 'text' },
   { id: 'txt-enc', name: 'Text Encryptor', description: 'Securely encrypt and decrypt text data', icon: LockIcon, category: 'text' },
+  { id: 'txt-summ', name: 'AI Text Summarizer', description: 'Generate summaries from long text automatically', icon: FileText, category: 'text' },
+  { id: 'txt-gram', name: 'Grammar Checker', description: 'Advanced proofreading and grammar correction', icon: Eye, category: 'text' },
+  { id: 'txt-trans', name: 'Translation Tool', description: 'Translate text between multiple languages', icon: Globe, category: 'text' },
+  { id: 'txt-find', name: 'Find & Replace', description: 'Search and replace text with advanced options', icon: Search, category: 'text' },
+  { id: 'txt-diff', name: 'Text Diff Checker', description: 'Compare two texts and highlight differences', icon: ArrowRightLeft, category: 'text' },
+  { id: 'txt-extract', name: 'Text Extractor', description: 'Extract specific patterns from text', icon: Regex, category: 'text' },
+  { id: 'txt-merge', name: 'Text Merger', description: 'Combine multiple text files or strings', icon: FileText, category: 'text' },
 
   // Developer Tools
-  { id: 'dev-min', name: 'Code Minifier', description: 'Minify HTML, CSS, and JS code', icon: FileCode, category: 'developer' },
-  { id: 'dev-json', name: 'JSON Formatter', description: 'Validate and format JSON data beautifier', icon: Brackets, category: 'developer', isPopular: true },
-  { id: 'dev-b64', name: 'Base64 Converter', description: 'Encode and decode Base64 strings', icon: Database, category: 'developer' },
-  { id: 'dev-url', name: 'URL Encoder', description: 'Encode or decode URLs for safe usage', icon: Link, category: 'developer' },
   { id: 'dev-col', name: 'Color Converter', description: 'Convert between HEX, RGB, HSL formats', icon: Pipette, category: 'developer' },
   { id: 'dev-reg', name: 'Regex Tester', description: 'Test and debug regular expressions', icon: Regex, category: 'developer', isNew: true },
+  { id: 'dev-fmt', name: 'Code Formatter', description: 'Format code in multiple programming languages', icon: FileCode, category: 'developer' },
+  { id: 'dev-api', name: 'API Tester', description: 'Test REST APIs with authentication and parameters', icon: Database, category: 'developer' },
+  { id: 'dev-db', name: 'Database Query Builder', description: 'Visual SQL query builder for databases', icon: Brackets, category: 'developer' },
+  { id: 'dev-json', name: 'JSON Validator', description: 'Validate and format JSON data', icon: Brackets, category: 'developer' },
+  { id: 'dev-css', name: 'CSS Minifier', description: 'Minify and optimize CSS code', icon: Palette, category: 'developer' },
+  { id: 'dev-hash', name: 'Hash Generator', description: 'Generate MD5, SHA-1, SHA-256 hashes', icon: Lock, category: 'developer' },
+  { id: 'dev-cron', name: 'Cron Generator', description: 'Generate cron expressions for scheduling', icon: Calendar, category: 'developer' },
 
   // Color Tools
   { id: 'col-pick', name: 'Image Color Picker', description: 'Extract palettes from uploaded images', icon: Pipette, category: 'color' },
   { id: 'col-grad', name: 'Gradient Generator', description: 'Create beautiful CSS gradients', icon: Layers, category: 'color', isPopular: true },
   { id: 'col-cont', name: 'Contrast Checker', description: 'Check accessibility contrast ratios', icon: Eye, category: 'color' },
   { id: 'col-pal', name: 'Palette Generator', description: 'Generate harmonious color schemes', icon: Grid, category: 'color' },
+  { id: 'col-pro', name: 'Professional Color Palettes', description: 'Premium color palettes for designers', icon: Palette, category: 'color' },
 
   // SEO
   { id: 'seo-kw', name: 'Keyword Density', description: 'Analyze keyword frequency in content', icon: BarChart, category: 'seo' },
   { id: 'seo-meta', name: 'Meta Tag Analyzer', description: 'Analyze and optimize SEO meta tags', icon: Tag, category: 'seo' },
+  { id: 'seo-back', name: 'Backlink Checker', description: 'Analyze backlinks and domain authority', icon: Link, category: 'seo' },
+  { id: 'seo-key', name: 'Keyword Research', description: 'Find trending keywords and competition analysis', icon: Search, category: 'seo' },
+  { id: 'seo-speed', name: 'Website Speed Analyzer', description: 'Analyze and optimize website performance', icon: Activity, category: 'seo' },
 
   // Utility
   { id: 'util-qr', name: 'QR Code Generator', description: 'Create and scan custom QR codes', icon: QrCode, category: 'utility', isPopular: true },
@@ -126,4 +147,59 @@ export const TOOLS: Tool[] = [
   { id: 'util-unit', name: 'Unit Converter', description: 'Convert length, weight, temperature', icon: Ruler, category: 'utility' },
   { id: 'util-time', name: 'Time Zone', description: 'Convert time across different zones', icon: Globe, category: 'utility' },
   { id: 'util-pass', name: 'Password Gen', description: 'Generate strong, secure passwords', icon: Shuffle, category: 'utility', isPopular: true },
+  { id: 'util-pass-mgr', name: 'Advanced Password Manager', description: 'Generate, store, and manage secure passwords', icon: Lock, category: 'utility' },
+  { id: 'util-file-enc', name: 'File Encryption', description: 'Securely encrypt and decrypt files', icon: LockIcon, category: 'utility' },
+  { id: 'util-backup', name: 'Data Backup Tool', description: 'Automated cloud backup and sync', icon: Database, category: 'utility' },
+  { id: 'util-morse', name: 'Morse Code Converter', description: 'Convert text to Morse code and vice versa', icon: Zap, category: 'utility' },
+  { id: 'util-binary', name: 'Binary Converter', description: 'Convert between binary, decimal, hex, octal', icon: Code, category: 'utility' },
+
+  { id: 'util-base64', name: 'Base64 Encoder', description: 'Encode and decode Base64 strings', icon: Lock, category: 'utility' },
+];
+
+export const PRICING_PLANS: PricingPlan[] = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    currency: 'USD',
+    interval: 'month',
+    features: [
+      'Access to 50+ tools',
+      'Basic image processing',
+      'Text formatting tools',
+      'Standard calculators',
+      'Community support'
+    ]
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 9.99,
+    currency: 'USD',
+    interval: 'month',
+    features: [
+      'Everything in Free',
+      'Unlimited usage',
+      'Advanced AI tools',
+      'File encryption',
+      'Priority support',
+      'No ads'
+    ],
+    popular: true
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 29.99,
+    currency: 'USD',
+    interval: 'month',
+    features: [
+      'Everything in Pro',
+      'API access',
+      'Custom integrations',
+      'Dedicated support',
+      'SLA guarantee',
+      'Team management'
+    ]
+  }
 ];
