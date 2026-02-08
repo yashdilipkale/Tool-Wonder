@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { createWorker } from 'tesseract.js';
-import { Upload, Download, Image as ImageIcon, ArrowRight, ScanText, FileText } from 'lucide-react';
+import { Upload, Download, Image as ImageIcon, ArrowRight, ScanText, FileText, Crown } from 'lucide-react';
 
 const ImageOCR: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -121,7 +121,13 @@ const ImageOCR: React.FC = () => {
           <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
             <ScanText size={20} />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Image to Text (OCR)</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Image to Text (OCR)</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <Crown size={12} />
+              Premium
+            </span>
+          </div>
         </div>
 
         <div className="space-y-4">

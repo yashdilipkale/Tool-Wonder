@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, DollarSign, Calendar, Target, PieChart, BarChart3 } from 'lucide-react';
+import { TrendingUp, DollarSign, Calendar, Target, PieChart, BarChart3, Crown } from 'lucide-react';
 
 const InvestmentCalculator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sip' | 'lumpsum' | 'comparison'>('sip');
@@ -13,7 +13,13 @@ const InvestmentCalculator: React.FC = () => {
         </div>
         <div>
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Investment Calculator</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">Plan your financial future with accurate investment calculations</p>
+          <div className="flex items-center gap-2 mt-2 justify-center">
+            <p className="text-slate-600 dark:text-slate-400">Plan your financial future with accurate investment calculations</p>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <Crown size={12} />
+              Premium
+            </span>
+          </div>
         </div>
       </div>
 

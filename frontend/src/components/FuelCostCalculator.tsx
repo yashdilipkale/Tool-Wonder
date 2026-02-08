@@ -1,493 +1,380 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Fuel, Car, Calculator, TrendingUp, DollarSign } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calculator, Fuel, Car, MapPin, TrendingUp, DollarSign, Gauge } from 'lucide-react';
 
 const FuelCostCalculator: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'trip' | 'efficiency' | 'comparison'>('trip');
-  const [results, setResults] = useState<{
+  const [distance, setDistance] = useState<string>('');
+  const [fuelType, setFuelType] = useState<'petrol' | 'diesel' | 'cng' | 'electric'>('petrol');
+  const [vehicleType, setVehicleType] = useState<'car' | 'bike' | 'scooter' | 'truck'>('car');
+  const [fuelEfficiency, setFuelEfficiency] = useState<string>('');
+  const [fuelPrice, setFuelPrice] = useState<string>('');
+  const [result, setResult] = useState<{
+    totalCost: number;
     fuelNeeded: number;
-    cost: number;
-    efficiency: number;
-    distance: number;
+    costPerKm: number;
+    co2Emissions: number;
   } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Indian fuel prices (approximate, in INR per liter/kg)
+  const defaultFuelPrices = {
+    petrol: 100,
+    diesel: 85,
+    cng: 70,
+    electric: 8 // per kWh
+  };
+
+  // Average fuel efficiency by vehicle type (km per liter/kg/kWh)
+  const defaultEfficiency = {
+    car: { petrol: 15, diesel: 20, cng: 25, electric: 4 },
+    bike: { petrol: 45, diesel: 0, cng: 0, electric: 80 },
+    scooter: { petrol: 55, diesel: 0, cng: 0, electric: 90 },
+    truck: { petrol: 6, diesel: 10, cng: 12, electric: 2 }
+  };
+
+  const calculateFuelCost = () => {
+    const distanceNum = parseFloat(distance);
+    const efficiencyNum = parseFloat(fuelEfficiency);
+    const priceNum = parseFloat(fuelPrice);
+
+    if (!distanceNum || distanceNum <= 0) {
+      setError('Please enter a valid distance.');
+      return;
+    }
+
+    if (!efficiencyNum || efficiencyNum <= 0) {
+      setError('Please enter a valid fuel efficiency.');
+      return;
+    }
+
+    if (!priceNum || priceNum <= 0) {
+      setError('Please enter a valid fuel price.');
+      return;
+    }
+
+    setError(null);
+
+    // Calculate fuel needed (in liters/kg/kWh)
+    const fuelNeeded = distanceNum / efficiencyNum;
+    
+    // Calculate total cost
+    const totalCost = fuelNeeded * priceNum;
+    
+    // Calculate cost per km
+    const costPerKm = totalCost / distanceNum;
+
+    // Calculate approximate CO2 emissions (kg per liter)
+    const co2Factors = {
+      petrol: 2.31,
+      diesel: 2.68,
+      cng: 1.56,
+      electric: 0 // Assuming zero direct emissions
+    };
+    
+    const co2Emissions = fuelNeeded * co2Factors[fuelType];
+
+    setResult({
+      totalCost,
+      fuelNeeded,
+      costPerKm,
+      co2Emissions
+    });
+  };
+
+  const resetCalculator = () => {
+    setDistance('');
+    setFuelType('petrol');
+    setVehicleType('car');
+    setFuelEfficiency('');
+    setFuelPrice('');
+    setResult(null);
+    setError(null);
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const getRecommendedEfficiency = () => {
+    return defaultEfficiency[vehicleType][fuelType];
+  };
+
+  const setDefaultValues = () => {
+    setFuelPrice(defaultFuelPrices[fuelType].toString());
+    setFuelEfficiency(getRecommendedEfficiency().toString());
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400">
-          <Fuel size={32} />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Fuel Cost Calculator</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">Calculate fuel costs, efficiency, and trip expenses</p>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-        <button
-          onClick={() => setActiveTab('trip')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
-            activeTab === 'trip'
-              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-          }`}
-        >
-          Trip Cost
-        </button>
-        <button
-          onClick={() => setActiveTab('efficiency')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
-            activeTab === 'efficiency'
-              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-          }`}
-        >
-          Fuel Efficiency
-        </button>
-        <button
-          onClick={() => setActiveTab('comparison')}
-          className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
-            activeTab === 'comparison'
-              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-          }`}
-        >
-          Compare Vehicles
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'trip' && <TripCostCalculator onResult={setResults} />}
-      {activeTab === 'efficiency' && <FuelEfficiencyCalculator onResult={setResults} />}
-      {activeTab === 'comparison' && <VehicleComparisonCalculator onResult={setResults} />}
-
-      {/* Results Display */}
-      {results && (
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-6 space-y-6">
-          <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 flex items-center gap-2">
-            <Calculator size={20} />
-            Calculation Results
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                {results.distance.toFixed(1)}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Distance (miles)</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {results.fuelNeeded.toFixed(2)}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Fuel Needed (gallons)</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-700 dark:text-red-300">
-                ${results.cost.toFixed(2)}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Total Cost</div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {results.efficiency.toFixed(1)}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">MPG</div>
-            </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
+            <Fuel size={20} />
           </div>
-        </div>
-      )}
-
-      {/* Fuel Tips */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-        <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">🚗 Fuel Saving Tips</h4>
-        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-          <li>• Maintain proper tire pressure to improve fuel efficiency by up to 3%</li>
-          <li>• Avoid excessive idling - turn off your engine if waiting more than 30 seconds</li>
-          <li>• Use cruise control on highways to maintain consistent speed</li>
-          <li>• Remove excess weight from your vehicle</li>
-          <li>• Regular maintenance improves fuel economy by 4-40%</li>
-        </ul>
-      </div>
-    </div>
-  );
-};
-
-const TripCostCalculator: React.FC<{
-  onResult: (result: { fuelNeeded: number; cost: number; efficiency: number; distance: number }) => void
-}> = ({ onResult }) => {
-  const [distance, setDistance] = useState<number>(100);
-  const [efficiency, setEfficiency] = useState<number>(25); // MPG
-  const [fuelPrice, setFuelPrice] = useState<number>(3.50);
-
-  const calculateTripCost = () => {
-    const fuelNeeded = distance / efficiency;
-    const cost = fuelNeeded * fuelPrice;
-
-    onResult({
-      fuelNeeded,
-      cost,
-      efficiency,
-      distance
-    });
-  };
-
-  useEffect(() => {
-    calculateTripCost();
-  }, [distance, efficiency, fuelPrice]);
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Distance */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Distance (miles)
-          </label>
-          <input
-            type="number"
-            value={distance}
-            onChange={(e) => setDistance(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.1"
-            placeholder="Enter distance"
-          />
-        </div>
-
-        {/* Fuel Efficiency */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Fuel Efficiency (MPG)
-          </label>
-          <input
-            type="number"
-            value={efficiency}
-            onChange={(e) => setEfficiency(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="1"
-            max="100"
-            step="0.1"
-            placeholder="Miles per gallon"
-          />
-        </div>
-
-        {/* Fuel Price */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Fuel Price ($/gallon)
-          </label>
-          <input
-            type="number"
-            value={fuelPrice}
-            onChange={(e) => setFuelPrice(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.01"
-            placeholder="Price per gallon"
-          />
-        </div>
-      </div>
-
-      {/* Common MPG Values */}
-      <div className="space-y-3">
-        <h4 className="font-medium text-slate-800 dark:text-slate-200">Common Fuel Efficiency Examples</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <button
-            onClick={() => setEfficiency(15)}
-            className="p-3 text-center rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-500 transition-colors"
-          >
-            <div className="font-medium">SUV</div>
-            <div className="text-sm opacity-75">15 MPG</div>
-          </button>
-          <button
-            onClick={() => setEfficiency(25)}
-            className="p-3 text-center rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-500 transition-colors"
-          >
-            <div className="font-medium">Sedan</div>
-            <div className="text-sm opacity-75">25 MPG</div>
-          </button>
-          <button
-            onClick={() => setEfficiency(35)}
-            className="p-3 text-center rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-500 transition-colors"
-          >
-            <div className="font-medium">Hybrid</div>
-            <div className="text-sm opacity-75">35 MPG</div>
-          </button>
-          <button
-            onClick={() => setEfficiency(45)}
-            className="p-3 text-center rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-500 transition-colors"
-          >
-            <div className="font-medium">Electric</div>
-            <div className="text-sm opacity-75">45+ MPG equiv.</div>
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          <strong>Formula:</strong> Fuel Cost = (Distance ÷ MPG) × Price per Gallon
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const FuelEfficiencyCalculator: React.FC<{
-  onResult: (result: { fuelNeeded: number; cost: number; efficiency: number; distance: number }) => void
-}> = ({ onResult }) => {
-  const [distance, setDistance] = useState<number>(200);
-  const [fuelUsed, setFuelUsed] = useState<number>(8);
-  const [fuelPrice, setFuelPrice] = useState<number>(3.50);
-
-  const calculateEfficiency = () => {
-    const efficiency = distance / fuelUsed;
-    const cost = fuelUsed * fuelPrice;
-
-    onResult({
-      fuelNeeded: fuelUsed,
-      cost,
-      efficiency,
-      distance
-    });
-  };
-
-  useEffect(() => {
-    calculateEfficiency();
-  }, [distance, fuelUsed, fuelPrice]);
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Distance Driven */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Distance Driven (miles)
-          </label>
-          <input
-            type="number"
-            value={distance}
-            onChange={(e) => setDistance(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.1"
-          />
-        </div>
-
-        {/* Fuel Used */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Fuel Used (gallons)
-          </label>
-          <input
-            type="number"
-            value={fuelUsed}
-            onChange={(e) => setFuelUsed(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.01"
-          />
-        </div>
-
-        {/* Fuel Price */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Fuel Price ($/gallon)
-          </label>
-          <input
-            type="number"
-            value={fuelPrice}
-            onChange={(e) => setFuelPrice(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.01"
-          />
-        </div>
-      </div>
-
-      <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-        <h4 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
-          <TrendingUp size={16} />
-          How to Calculate Your MPG
-        </h4>
-        <ol className="text-sm text-green-700 dark:text-green-300 space-y-1">
-          <li>1. Fill your tank completely and reset your trip odometer</li>
-          <li>2. Drive normally until you need to refill</li>
-          <li>3. Note the miles driven and gallons added</li>
-          <li>4. Divide miles by gallons to get your MPG</li>
-        </ol>
-      </div>
-
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          <strong>Formula:</strong> MPG = Distance Driven ÷ Gallons of Fuel Used
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const VehicleComparisonCalculator: React.FC<{
-  onResult: (result: { fuelNeeded: number; cost: number; efficiency: number; distance: number }) => void
-}> = ({ onResult }) => {
-  const [distance, setDistance] = useState<number>(100);
-  const [fuelPrice, setFuelPrice] = useState<number>(3.50);
-  const [vehicle1, setVehicle1] = useState<{ name: string; mpg: number }>({ name: 'Sedan', mpg: 25 });
-  const [vehicle2, setVehicle2] = useState<{ name: string; mpg: number }>({ name: 'SUV', mpg: 18 });
-
-  const calculateComparison = () => {
-    const fuel1 = distance / vehicle1.mpg;
-    const fuel2 = distance / vehicle2.mpg;
-    const cost1 = fuel1 * fuelPrice;
-    const cost2 = fuel2 * fuelPrice;
-
-    // Show results for the more efficient vehicle
-    const betterVehicle = cost1 <= cost2 ? vehicle1 : vehicle2;
-    const fuelNeeded = distance / betterVehicle.mpg;
-    const cost = fuelNeeded * fuelPrice;
-
-    onResult({
-      fuelNeeded,
-      cost,
-      efficiency: betterVehicle.mpg,
-      distance
-    });
-  };
-
-  useEffect(() => {
-    calculateComparison();
-  }, [distance, fuelPrice, vehicle1, vehicle2]);
-
-  return (
-    <div className="space-y-6">
-      {/* Common Inputs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Distance (miles)
-          </label>
-          <input
-            type="number"
-            value={distance}
-            onChange={(e) => setDistance(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.1"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Fuel Price ($/gallon)
-          </label>
-          <input
-            type="number"
-            value={fuelPrice}
-            onChange={(e) => setFuelPrice(Number(e.target.value))}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            min="0"
-            step="0.01"
-          />
-        </div>
-      </div>
-
-      {/* Vehicle 1 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Car size={20} />
-          Vehicle 1
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={vehicle1.name}
-            onChange={(e) => setVehicle1({ ...vehicle1, name: e.target.value })}
-            placeholder="Vehicle name"
-            className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
-          <input
-            type="number"
-            value={vehicle1.mpg}
-            onChange={(e) => setVehicle1({ ...vehicle1, mpg: Number(e.target.value) })}
-            placeholder="MPG"
-            min="1"
-            step="0.1"
-            className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      {/* Vehicle 2 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Car size={20} />
-          Vehicle 2
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={vehicle2.name}
-            onChange={(e) => setVehicle2({ ...vehicle2, name: e.target.value })}
-            placeholder="Vehicle name"
-            className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
-          <input
-            type="number"
-            value={vehicle2.mpg}
-            onChange={(e) => setVehicle2({ ...vehicle2, mpg: Number(e.target.value) })}
-            placeholder="MPG"
-            min="1"
-            step="0.1"
-            className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      {/* Comparison Results */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
-        <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-4">Cost Comparison</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg">
-            <h5 className="font-medium text-slate-800 dark:text-slate-200 mb-2">{vehicle1.name}</h5>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              ${(distance / vehicle1.mpg * fuelPrice).toFixed(2)}
-            </div>
-            <div className="text-sm text-slate-600 dark:text-slate-400">
-              {(distance / vehicle1.mpg).toFixed(2)} gallons
-            </div>
-          </div>
-
-          <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg">
-            <h5 className="font-medium text-slate-800 dark:text-slate-200 mb-2">{vehicle2.name}</h5>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              ${(distance / vehicle2.mpg * fuelPrice).toFixed(2)}
-            </div>
-            <div className="text-sm text-slate-600 dark:text-slate-400">
-              {(distance / vehicle2.mpg).toFixed(2)} gallons
-            </div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Indian Fuel Cost Calculator</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+              Premium
+            </span>
           </div>
         </div>
 
-        <div className="mt-4 text-center">
-          <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-            {(() => {
-              const cost1 = distance / vehicle1.mpg * fuelPrice;
-              const cost2 = distance / vehicle2.mpg * fuelPrice;
-              const savings = Math.abs(cost1 - cost2);
-              const better = cost1 < cost2 ? vehicle1.name : vehicle2.name;
-              return `${better} saves $${savings.toFixed(2)} for this trip`;
-            })()}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Input Section */}
+          <div className="space-y-4">
+            {/* Distance Input */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Distance (km)
+              </label>
+              <input
+                type="number"
+                value={distance}
+                onChange={(e) => setDistance(e.target.value)}
+                placeholder="Enter distance to travel"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                min="0"
+                step="0.1"
+              />
+            </div>
+
+            {/* Vehicle Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Vehicle Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {['car', 'bike', 'scooter', 'truck'].map((type) => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <input
+                      type="radio"
+                      name="vehicleType"
+                      value={type}
+                      checked={vehicleType === type}
+                      onChange={(e) => setVehicleType(e.target.value as 'car' | 'bike' | 'scooter' | 'truck')}
+                      className="w-4 h-4 text-emerald-600 bg-slate-100 border-slate-300 focus:ring-emerald-500 dark:focus:ring-emerald-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300 capitalize">{type}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Fuel Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fuel Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {['petrol', 'diesel', 'cng', 'electric'].map((type) => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <input
+                      type="radio"
+                      name="fuelType"
+                      value={type}
+                      checked={fuelType === type}
+                      onChange={(e) => {
+                        setFuelType(e.target.value as 'petrol' | 'diesel' | 'cng' | 'electric');
+                        setDefaultValues();
+                      }}
+                      className="w-4 h-4 text-emerald-600 bg-slate-100 border-slate-300 focus:ring-emerald-500 dark:focus:ring-emerald-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
+                    />
+                    <span className="text-sm text-slate-700 dark:text-slate-300 capitalize">{type}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Fuel Efficiency Input */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fuel Efficiency (km per {fuelType === 'electric' ? 'kWh' : 'liter/kg'})
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={fuelEfficiency}
+                  onChange={(e) => setFuelEfficiency(e.target.value)}
+                  placeholder={`e.g., ${getRecommendedEfficiency()}`}
+                  className="flex-1 p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  min="0"
+                  step="0.1"
+                />
+                <button
+                  onClick={setDefaultValues}
+                  className="px-3 py-3 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 border border-emerald-200 dark:border-emerald-700 rounded-lg"
+                >
+                  Auto-fill
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Recommended: {getRecommendedEfficiency()} km per {fuelType === 'electric' ? 'kWh' : 'liter/kg'}
+              </p>
+            </div>
+
+            {/* Fuel Price Input */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Fuel Price (₹ per {fuelType === 'electric' ? 'kWh' : 'liter/kg'})
+              </label>
+              <input
+                type="number"
+                value={fuelPrice}
+                onChange={(e) => setFuelPrice(e.target.value)}
+                placeholder={`e.g., ${defaultFuelPrices[fuelType]}`}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                min="0"
+                step="0.01"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Current average: ₹{defaultFuelPrices[fuelType]} per {fuelType === 'electric' ? 'kWh' : 'liter/kg'}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={calculateFuelCost}
+                disabled={!distance || !fuelEfficiency || !fuelPrice}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Calculator size={16} />
+                Calculate Cost
+              </button>
+
+              <button
+                onClick={resetCalculator}
+                className="px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-4">
+            {result && (
+              <div className="space-y-4">
+                {/* Main Result */}
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">
+                    <DollarSign size={20} />
+                    Fuel Cost Analysis
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-emerald-200 dark:border-emerald-700">
+                      <span className="text-emerald-800 dark:text-emerald-200">Total Cost:</span>
+                      <span className="font-bold text-emerald-900 dark:text-emerald-100 text-lg">{formatCurrency(result.totalCost)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-emerald-200 dark:border-emerald-700">
+                      <span className="text-emerald-800 dark:text-emerald-200">Fuel Needed:</span>
+                      <span className="font-semibold text-emerald-900 dark:text-emerald-100">{result.fuelNeeded.toFixed(2)} {fuelType === 'electric' ? 'kWh' : 'liters/kg'}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-emerald-200 dark:border-emerald-700">
+                      <span className="text-emerald-800 dark:text-emerald-200">Cost per km:</span>
+                      <span className="font-semibold text-emerald-900 dark:text-emerald-100">{formatCurrency(result.costPerKm)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-emerald-800 dark:text-emerald-200">CO₂ Emissions:</span>
+                      <span className="font-semibold text-emerald-900 dark:text-emerald-100">{result.co2Emissions.toFixed(2)} kg</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fuel Efficiency */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">Fuel Efficiency</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-blue-800 dark:text-blue-200">Distance:</span>
+                      <span className="font-semibold text-blue-900 dark:text-blue-100">{distance} km</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-800 dark:text-blue-200">Efficiency:</span>
+                      <span className="font-semibold text-blue-900 dark:text-blue-100">{fuelEfficiency} km per {fuelType === 'electric' ? 'kWh' : 'liter/kg'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-800 dark:text-blue-200">Consumption:</span>
+                      <span className="font-semibold text-blue-900 dark:text-blue-100">{(100 / parseFloat(fuelEfficiency)).toFixed(2)} {fuelType === 'electric' ? 'kWh' : 'liters'} per 100 km</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Savings Tips */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-3">💡 Fuel Saving Tips</h3>
+                  <ul className="text-sm text-yellow-800 dark:text-yellow-200 space-y-1">
+                    <li>• Maintain proper tire pressure</li>
+                    <li>• Drive at steady speeds</li>
+                    <li>• Avoid unnecessary idling</li>
+                    <li>• Use air conditioning sparingly</li>
+                    <li>• Keep your vehicle well-maintained</li>
+                  </ul>
+                </div>
+
+                {/* Quick Calculations */}
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-3">Quick Cost Estimates</h3>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {[50, 100, 500, 1000].map((quickDistance) => {
+                      const quickCost = (quickDistance / parseFloat(fuelEfficiency)) * parseFloat(fuelPrice);
+                      return (
+                        <div key={quickDistance} className="text-center p-2 bg-white dark:bg-slate-700 rounded">
+                          <div className="font-semibold text-purple-900 dark:text-purple-100">
+                            {quickDistance} km
+                          </div>
+                          <div className="text-purple-700 dark:text-purple-300">
+                            {formatCurrency(quickCost)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!result && !error && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4 text-slate-400 dark:text-slate-500">
+                  <Fuel size={32} />
+                </div>
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Calculate Fuel Costs</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Enter distance, vehicle type, and fuel details to calculate your fuel costs and efficiency.
+                </p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          <strong>Formula:</strong> Fuel Cost = (Distance ÷ MPG) × Price per Gallon
+        {/* Information */}
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">Fuel Efficiency Information</h3>
+          <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+            <p>
+              <strong>Fuel Efficiency:</strong> Varies by vehicle type, driving conditions, and maintenance.
+            </p>
+            <p>
+              <strong>Electric Vehicles:</strong> More efficient than internal combustion engines, with lower running costs.
+            </p>
+            <p>
+              <strong>CNG Vehicles:</strong> Lower emissions and fuel costs compared to petrol/diesel.
+            </p>
+            <p>
+              <strong>CO₂ Emissions:</strong> Approximate values for environmental impact assessment.
+            </p>
+          </div>
         </div>
       </div>
     </div>

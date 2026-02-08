@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
-import Header from './Header';
-import Footer from './Footer';
+import { useCredits } from '../CreditContext';
 
 const Signup: React.FC = () => {
     const [name, setName] = useState('');
@@ -13,6 +12,7 @@ const Signup: React.FC = () => {
   const [errors, setErrors] = useState<{name?: string; email?: string; password?: string; confirmPassword?: string; general?: string}>({});
   const [touched, setTouched] = useState<{name?: boolean; email?: boolean; password?: boolean; confirmPassword?: boolean}>({});
   const { signup, loading } = useAuth();
+  const { addCredits } = useCredits();
   const navigate = useNavigate();
 
   const validateName = (name: string) => {
@@ -127,8 +127,6 @@ const Signup: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
-      <Header />
-
       <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
@@ -300,8 +298,6 @@ const Signup: React.FC = () => {
           </form>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -44,7 +44,8 @@ const CurrencyConverter: React.FC = () => {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await fetch('http://localhost:3001/currency-rates');
+        // Use a free currency API instead of the backend
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
         if (!response.ok) {
           throw new Error('Failed to fetch exchange rates');
         }

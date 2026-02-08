@@ -100,11 +100,6 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
                 <Star size={10} /> HOT
               </span>
             )}
-            {tool.isPremium && (
-              <span className="px-2 py-1 text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full flex items-center gap-1">
-                <Crown size={10} /> PREMIUM
-              </span>
-            )}
           </div>
         </div>
 

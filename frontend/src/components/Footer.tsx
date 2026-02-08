@@ -4,7 +4,7 @@ import { Terminal, Github, Linkedin, Heart } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-20 pb-10" id="contact">
+    <footer className="bg-slate-800 text-slate-300 pt-20 pb-10" id="contact">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
             <h3 className="text-white font-semibold mb-6">Categories</h3>
             <ul className="space-y-4">
               <li><a href="#image-tools" className="hover:text-primary-400 transition-colors">Image Tools</a></li>
-              <li><a href="#pdf-tools" className="hover:text-primary-400 transition-colors">PDF Tools</a></li>
+              <li><a href="#text-tools" className="hover:text-primary-400 transition-colors">Text Tools</a></li>
               <li><a href="#dev-tools" className="hover:text-primary-400 transition-colors">Developer Tools</a></li>
               <li><a href="#calculators" className="hover:text-primary-400 transition-colors">Calculators</a></li>
             </ul>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, Percent, DollarSign } from 'lucide-react';
+import { Calculator, Percent, DollarSign, Crown } from 'lucide-react';
 
 const GSTCalculator: React.FC = () => {
   const [amount, setAmount] = useState<string>('');
@@ -97,7 +97,13 @@ const GSTCalculator: React.FC = () => {
           <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600 dark:text-orange-400">
             <Percent size={20} />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">GST Calculator</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">GST Calculator</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <Crown size={12} />
+              Premium
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Calculator, Scale } from 'lucide-react';
+import { Activity, Calculator, Scale, Crown } from 'lucide-react';
 
 const BMICalculator: React.FC = () => {
   const [height, setHeight] = useState<string>('');
@@ -116,7 +116,13 @@ const BMICalculator: React.FC = () => {
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
             <Activity size={20} />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">BMI Calculator</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">BMI Calculator</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <Crown size={12} />
+              Premium
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

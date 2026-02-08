@@ -4,6 +4,7 @@ import { Search, ChevronUp } from 'lucide-react';
 import { gsap } from 'gsap';
 import { AuthProvider } from './AuthContext';
 import { ThemeProvider } from './ThemeContext';
+import { CreditProvider } from './CreditContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
@@ -15,6 +16,8 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfUse from './components/TermsOfUse';
 import Offline from './components/Offline';
 import InstallPrompt from './components/InstallPrompt';
+import SalesTaxCalculator from './components/SalesTaxCalculator';
+import CreditTest from './components/CreditTest';
 import { CATEGORIES, TOOLS } from './data';
 import { CategoryDefinition, Tool } from './types';
 import { isOnline, onOnlineStatusChange } from './utils/pwa';
@@ -101,12 +104,13 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        {/* Install Prompt */}
-        <InstallPrompt />
+        <CreditProvider>
+          {/* Install Prompt */}
+          <InstallPrompt />
 
-        <Routes>
-          <Route path="/" element={
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col transition-colors duration-300">
+          <Routes>
+            <Route path="/" element={
+              <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col transition-colors duration-300">
               <Header />
 
               <main className="flex-grow">
@@ -205,11 +209,52 @@ function App() {
               </button>
             </div>
           } />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/tool/:toolId" element={<ToolPage />} />
+          <Route path="/signup" element={
+            <div className="min-h-screen bg-slate-50 flex flex-col">
+              <Header />
+              <main className="flex-grow py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <Signup />
+                </div>
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/login" element={
+            <div className="min-h-screen bg-slate-50 flex flex-col">
+              <Header />
+              <main className="flex-grow py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <Login />
+                </div>
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/tool/:toolId" element={
+            <div className="min-h-screen bg-slate-50 flex flex-col">
+              <Header />
+              <main className="flex-grow py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <ToolPage />
+                </div>
+              </main>
+              <Footer />
+            </div>
+          } />
+          <Route path="/credit-test" element={
+            <div className="min-h-screen bg-slate-50 flex flex-col">
+              <Header />
+              <main className="flex-grow py-8">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <CreditTest />
+                </div>
+              </main>
+              <Footer />
+            </div>
+          } />
           <Route path="/privacy-policy" element={
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <div className="min-h-screen bg-slate-50 flex flex-col">
               <Header />
               <main className="flex-grow py-8">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -220,7 +265,7 @@ function App() {
             </div>
           } />
           <Route path="/terms-of-use" element={
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <div className="min-h-screen bg-slate-50 flex flex-col">
               <Header />
               <main className="flex-grow py-8">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,9 +276,9 @@ function App() {
             </div>
           } />
         </Routes>
+        </CreditProvider>
       </AuthProvider>
     </ThemeProvider>
   );
 }
-
 export default App;

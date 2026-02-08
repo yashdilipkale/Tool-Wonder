@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
-import Header from './Header';
-import Footer from './Footer';
+import { useCredits } from '../CreditContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +10,7 @@ const Login: React.FC = () => {
   const [errors, setErrors] = useState<{email?: string; password?: string; general?: string}>({});
   const [touched, setTouched] = useState<{email?: boolean; password?: boolean}>({});
   const { login, loading } = useAuth();
+  const { addCredits } = useCredits();
   const navigate = useNavigate();
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,8 +75,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
-      <Header />
-
       <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
@@ -194,8 +192,6 @@ const Login: React.FC = () => {
           </form>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

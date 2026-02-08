@@ -9,6 +9,7 @@ export interface Tool {
   isNew?: boolean;
   isPopular?: boolean;
   isPremium?: boolean;
+  creditCost?: number;
 }
 
 export type ToolCategory = 
@@ -38,4 +39,12 @@ export interface PricingPlan {
   features: string[];
   description?: string;
   popular?: boolean;
+  credits?: number; // Credits included with this plan
+}
+
+export interface UserCredits {
+  current: number;
+  totalEarned: number;
+  plan: 'free' | 'pro' | 'enterprise';
+  lastReset: Date;
 }

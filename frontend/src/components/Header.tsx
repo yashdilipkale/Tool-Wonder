@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Terminal, Mail, Sun, Moon, User, LogOut, Zap } from 'lucide-react';
+import { Menu, X, Terminal, Mail, Sun, Moon, User, LogOut, Zap, Coins } from 'lucide-react';
 import { useTheme } from '../ThemeContext';
 import { useAuth } from '../AuthContext';
+import { useCredits } from '../CreditContext';
 
 
 const Header: React.FC = () => {
@@ -11,6 +12,7 @@ const Header: React.FC = () => {
 
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { credits } = useCredits();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,10 +30,10 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-md py-3' 
+          isScrolled
+            ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-md py-3'
             : 'bg-transparent py-5'
         }`}
       >
@@ -59,8 +61,8 @@ const Header: React.FC = () => {
               <ul className="flex gap-8">
                 {navLinks.map((link) => (
                   <li key={link.name}>
-                    <a 
-                      href={link.href} 
+                    <a
+                      href={link.href}
                       className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary-600 dark:after:bg-primary-400 after:transition-all hover:after:w-full"
                     >
                       {link.name}
@@ -78,6 +80,7 @@ const Header: React.FC = () => {
                 >
                   {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                 </button>
+
 
                 {/* Authentication */}
                 {user ? (
@@ -129,8 +132,8 @@ const Header: React.FC = () => {
               >
                 {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
               </button>
-              
-              <button 
+
+              <button
                 className="p-2 text-slate-600 dark:text-slate-300 hover:text-primary-600 transition-colors"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open menu"
@@ -143,7 +146,7 @@ const Header: React.FC = () => {
       </header>
 
       {/* Mobile Menu Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity duration-300 ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
@@ -151,21 +154,21 @@ const Header: React.FC = () => {
       />
 
       {/* Mobile Sidebar */}
-      <div 
+      <div
         className={`fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-slate-900 z-[70] shadow-2xl transform transition-transform duration-300 ease-out ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="p-6">
           <div className="flex justify-end mb-8">
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(false)}
               className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <X size={28} />
             </button>
           </div>
-          
+
           <ul className="space-y-6">
             {navLinks.map((link) => (
               <li key={link.name}>
@@ -179,6 +182,7 @@ const Header: React.FC = () => {
               </li>
             ))}
           </ul>
+
 
 
 

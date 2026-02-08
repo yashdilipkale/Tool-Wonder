@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, DollarSign, Calendar, Percent } from 'lucide-react';
+import { Calculator, DollarSign, Calendar, Percent, Crown } from 'lucide-react';
 
 const LoanEMICalculator: React.FC = () => {
   const [loanAmount, setLoanAmount] = useState<string>('');
@@ -100,7 +100,13 @@ const LoanEMICalculator: React.FC = () => {
           <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
             <Calculator size={20} />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Loan EMI Calculator</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Loan EMI Calculator</h2>
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
+              <Crown size={12} />
+              Premium
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

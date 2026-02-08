@@ -1,6 +1,7 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, AlertTriangle, Coins } from 'lucide-react';
+import { useCredits } from '../CreditContext';
 import { TOOLS } from '../data';
 import WordCounter from './WordCounter';
 import ImageConverter from './ImageConverter';
@@ -36,7 +37,6 @@ import KeywordDensity from './KeywordDensity';
 import MetaTagAnalyzer from './MetaTagAnalyzer';
 import TextSummarizer from './TextSummarizer';
 import GrammarChecker from './GrammarChecker';
-import TranslationTool from './TranslationTool';
 import FindReplace from './FindReplace';
 import TextDiffChecker from './TextDiffChecker';
 import TextExtractor from './TextExtractor';
@@ -71,6 +71,11 @@ import FuelCostCalculator from './FuelCostCalculator';
 
 const ToolPage: React.FC = () => {
   const { toolId } = useParams<{ toolId: string }>();
+  const navigate = useNavigate();
+  const { credits, deductCredits, hasEnoughCredits } = useCredits();
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [isUsingTool, setIsUsingTool] = useState(false);
+  
   const tool = TOOLS.find(t => t.id === toolId);
 
   if (!tool) {
@@ -83,6 +88,35 @@ const ToolPage: React.FC = () => {
       </div>
     );
   }
+
+  // Check if tool requires credits and user has enough
+  const handleToolAccess = () => {
+    if (tool.isPremium && tool.creditCost) {
+      if (hasEnoughCredits(tool.creditCost)) {
+        // Deduct credits and allow access
+        const success = deductCredits(tool.creditCost);
+        if (success) {
+          setIsUsingTool(true);
+        } else {
+          setShowCreditModal(true);
+        }
+      } else {
+        setShowCreditModal(true);
+      }
+    } else {
+      // Free tool, allow access
+      setIsUsingTool(true);
+    }
+  };
+
+  // Auto-check credits on component mount for premium tools
+  useEffect(() => {
+    if (tool.isPremium && tool.creditCost) {
+      handleToolAccess();
+    } else {
+      setIsUsingTool(true);
+    }
+  }, [tool, credits.current]);
 
   const Icon = tool.icon;
 
@@ -121,167 +155,167 @@ const ToolPage: React.FC = () => {
           )}
         </div>
 
-        {/* Tool Content */}
-        {/* Fully Implemented Tools */}
-        {tool.id === 'img-conv' ? (
-          <ImageConverter />
-        ) : tool.id === 'img-comp' ? (
-          <ImageCompressor />
-        ) : tool.id === 'img-res' ? (
-          <ImageResizer />
-        ) : tool.id === 'img-crop' ? (
-          <ImageCropper />
-        ) : tool.id === 'img-ocr' ? (
-          <ImageOCR />
-        ) : tool.id === 'img-rot' ? (
-          <ImageRotator />
-        ) : tool.id === 'calc-sci' ? (
-          <ScientificCalculator />
-        ) : tool.id === 'calc-age' ? (
-          <AgeCalculator />
-        ) : tool.id === 'calc-bmi' ? (
-          <BMICalculator />
-        ) : tool.id === 'calc-emi' ? (
-          <LoanEMICalculator />
-        ) : tool.id === 'calc-gst' ? (
-          <GSTCalculator />
-        ) : tool.id === 'calc-curr' ? (
-          <CurrencyConverter />
-        ) : tool.id === 'txt-case' ? (
-          <TextCaseConverter />
-        ) : tool.id === 'txt-count' ? (
-          <WordCounter />
-        ) : tool.id === 'txt-dedup' ? (
-          <RemoveDuplicates />
-        ) : tool.id === 'txt-sort' ? (
-          <TextSorter />
-        ) : tool.id === 'txt-rev' ? (
-          <TextReverser />
-        ) : tool.id === 'txt-enc' ? (
-          <TextEncryptor />
-        ) : tool.id === 'dev-min' ? (
-          <CodeMinifier />
-        ) : tool.id === 'dev-json' ? (
-          <JSONFormatter />
-        ) : tool.id === 'util-base64' ? (
-          <Base64Converter />
 
-        ) : tool.id === 'dev-col' ? (
-          <ColorConverter />
-        ) : tool.id === 'dev-reg' ? (
-          <RegexTester />
-        ) : tool.id === 'dev-fmt' ? (
-          <CodeFormatter />
-        ) : tool.id === 'dev-api' ? (
-          <ApiTester />
-        ) : tool.id === 'dev-db' ? (
-          <DatabaseQueryBuilder />
-        ) : tool.id === 'dev-css' ? (
-          <CSSMinifier />
-        ) : tool.id === 'dev-hash' ? (
-          <HashGenerator />
-        ) : tool.id === 'dev-cron' ? (
-          <CronGenerator />
-        ) : tool.id === 'col-pick' ? (
-          <ImageColorPicker />
-        ) : tool.id === 'col-grad' ? (
-          <GradientGenerator />
-        ) : tool.id === 'col-cont' ? (
-          <ContrastChecker />
-        ) : tool.id === 'col-pal' ? (
-          <PaletteGenerator />
-        ) : tool.id === 'col-pro' ? (
-          <ProfessionalColorPalettes />
-        ) : tool.id === 'seo-kw' ? (
-          <KeywordDensity />
-        ) : tool.id === 'seo-meta' ? (
-          <MetaTagAnalyzer />
-        ) : tool.id === 'seo-back' ? (
-          <BacklinkChecker />
-        ) : tool.id === 'seo-key' ? (
-          <KeywordResearch />
-        ) : tool.id === 'seo-speed' ? (
-          <WebsiteSpeedAnalyzer />
-        ) : tool.id === 'txt-summ' ? (
-          <TextSummarizer />
-        ) : tool.id === 'txt-gram' ? (
-          <GrammarChecker />
-        ) : tool.id === 'txt-trans' ? (
-          <TranslationTool />
-        ) : tool.id === 'txt-find' ? (
-          <FindReplace />
-        ) : tool.id === 'txt-diff' ? (
-          <TextDiffChecker />
-        ) : tool.id === 'txt-extract' ? (
-          <TextExtractor />
-        ) : tool.id === 'txt-merge' ? (
-          <TextMerger />
-        ) : tool.id === 'util-qr' ? (
-          <QRCodeGenerator />
-        ) : tool.id === 'util-bar' ? (
-          <BarcodeGenerator />
-        ) : tool.id === 'util-uuid' ? (
-          <UUIDGenerator />
-        ) : tool.id === 'util-unit' ? (
-          <UnitConverter />
-        ) : tool.id === 'util-time' ? (
-          <TimeZoneConverter />
-        ) : tool.id === 'util-pass' ? (
-          <PasswordGenerator />
-        ) : tool.id === 'util-pass-mgr' ? (
-          <AdvancedPasswordManager />
-        ) : tool.id === 'util-file-enc' ? (
-          <FileEncryption />
-        ) : tool.id === 'util-backup' ? (
-          <DataBackupTool />
-        ) : tool.id === 'util-morse' ? (
-          <MorseCodeConverter />
-        ) : tool.id === 'util-binary' ? (
-          <BinaryConverter />
-        ) : tool.id === 'calc-invest' ? (
-          <InvestmentCalculator />
-        ) : tool.id === 'calc-tip' ? (
-          <TipCalculator />
-        ) : tool.id === 'calc-percent' ? (
-          <PercentageCalculator />
-        ) : tool.id === 'calc-sales' ? (
-          <SalesTaxCalculator />
-        ) : tool.id === 'calc-fuel' ? (
-          <FuelCostCalculator />
-        ) : tool.id.startsWith('pdf-') || tool.id.startsWith('doc-') || tool.id === 'calc-curr' || tool.id.startsWith('img-') ? (
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600 dark:text-amber-400">
-                <Icon size={32} />
+        {/* Tool Content */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
+          {tool.id === 'img-conv' ? (
+            <ImageConverter />
+          ) : tool.id === 'img-comp' ? (
+            <ImageCompressor />
+          ) : tool.id === 'img-res' ? (
+            <ImageResizer />
+          ) : tool.id === 'img-crop' ? (
+            <ImageCropper />
+          ) : tool.id === 'img-ocr' ? (
+            <ImageOCR />
+          ) : tool.id === 'img-rot' ? (
+            <ImageRotator />
+          ) : tool.id === 'calc-sci' ? (
+            <ScientificCalculator />
+          ) : tool.id === 'calc-age' ? (
+            <AgeCalculator />
+          ) : tool.id === 'calc-bmi' ? (
+            <BMICalculator />
+          ) : tool.id === 'calc-emi' ? (
+            <LoanEMICalculator />
+          ) : tool.id === 'calc-gst' ? (
+            <GSTCalculator />
+          ) : tool.id === 'calc-curr' ? (
+            <CurrencyConverter />
+          ) : tool.id === 'txt-case' ? (
+            <TextCaseConverter />
+          ) : tool.id === 'txt-count' ? (
+            <WordCounter />
+          ) : tool.id === 'txt-dedup' ? (
+            <RemoveDuplicates />
+          ) : tool.id === 'txt-sort' ? (
+            <TextSorter />
+          ) : tool.id === 'txt-rev' ? (
+            <TextReverser />
+          ) : tool.id === 'txt-enc' ? (
+            <TextEncryptor />
+          ) : tool.id === 'dev-min' ? (
+            <CodeMinifier />
+          ) : tool.id === 'dev-json' ? (
+            <JSONFormatter />
+          ) : tool.id === 'util-base64' ? (
+            <Base64Converter />
+
+          ) : tool.id === 'dev-col' ? (
+            <ColorConverter />
+          ) : tool.id === 'dev-reg' ? (
+            <RegexTester />
+          ) : tool.id === 'dev-fmt' ? (
+            <CodeFormatter />
+          ) : tool.id === 'dev-api' ? (
+            <ApiTester />
+          ) : tool.id === 'dev-db' ? (
+            <DatabaseQueryBuilder />
+          ) : tool.id === 'dev-css' ? (
+            <CSSMinifier />
+          ) : tool.id === 'dev-hash' ? (
+            <HashGenerator />
+          ) : tool.id === 'dev-cron' ? (
+            <CronGenerator />
+          ) : tool.id === 'col-pick' ? (
+            <ImageColorPicker />
+          ) : tool.id === 'col-grad' ? (
+            <GradientGenerator />
+          ) : tool.id === 'col-cont' ? (
+            <ContrastChecker />
+          ) : tool.id === 'col-pal' ? (
+            <PaletteGenerator />
+          ) : tool.id === 'col-pro' ? (
+            <ProfessionalColorPalettes />
+          ) : tool.id === 'seo-kw' ? (
+            <KeywordDensity />
+          ) : tool.id === 'seo-meta' ? (
+            <MetaTagAnalyzer />
+          ) : tool.id === 'seo-back' ? (
+            <BacklinkChecker />
+          ) : tool.id === 'seo-key' ? (
+            <KeywordResearch />
+          ) : tool.id === 'seo-speed' ? (
+            <WebsiteSpeedAnalyzer />
+          ) : tool.id === 'txt-summ' ? (
+            <TextSummarizer />
+          ) : tool.id === 'txt-gram' ? (
+            <GrammarChecker />
+          ) : tool.id === 'txt-find' ? (
+            <FindReplace />
+          ) : tool.id === 'txt-diff' ? (
+            <TextDiffChecker />
+          ) : tool.id === 'txt-extract' ? (
+            <TextExtractor />
+          ) : tool.id === 'txt-merge' ? (
+            <TextMerger />
+          ) : tool.id === 'util-qr' ? (
+            <QRCodeGenerator />
+          ) : tool.id === 'util-bar' ? (
+            <BarcodeGenerator />
+          ) : tool.id === 'util-uuid' ? (
+            <UUIDGenerator />
+          ) : tool.id === 'util-unit' ? (
+            <UnitConverter />
+          ) : tool.id === 'util-time' ? (
+            <TimeZoneConverter />
+          ) : tool.id === 'util-pass' ? (
+            <PasswordGenerator />
+          ) : tool.id === 'util-pass-mgr' ? (
+            <AdvancedPasswordManager />
+          ) : tool.id === 'util-file-enc' ? (
+            <FileEncryption />
+          ) : tool.id === 'util-backup' ? (
+            <DataBackupTool />
+          ) : tool.id === 'util-morse' ? (
+            <MorseCodeConverter />
+          ) : tool.id === 'util-binary' ? (
+            <BinaryConverter />
+          ) : tool.id === 'calc-invest' ? (
+            <InvestmentCalculator />
+          ) : tool.id === 'calc-tip' ? (
+            <TipCalculator />
+          ) : tool.id === 'calc-percent' ? (
+            <PercentageCalculator />
+          ) : tool.id === 'calc-sales' ? (
+            <SalesTaxCalculator />
+          ) : tool.id === 'calc-fuel' ? (
+            <FuelCostCalculator />
+          ) : tool.id.startsWith('pdf-') || tool.id.startsWith('doc-') || tool.id === 'calc-curr' || tool.id.startsWith('img-') ? (
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
+              <div className="text-center py-20">
+                <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600 dark:text-amber-400">
+                  <Icon size={32} />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Backend Required</h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-4">
+                  This tool requires server-side processing for security, performance, or external API integration.
+                </p>
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-left">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    <strong>What this involves:</strong><br />
+                    • File upload and processing<br />
+                    • External API integrations<br />
+                    • Complex calculations<br />
+                    • Secure document handling
+                  </p>
+                </div>
               </div>
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Backend Required</h2>
-              <p className="text-slate-500 dark:text-slate-400 mb-4">
-                This tool requires server-side processing for security, performance, or external API integration.
-              </p>
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-left">
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  <strong>What this involves:</strong><br />
-                  • File upload and processing<br />
-                  • External API integrations<br />
-                  • Complex calculations<br />
-                  • Secure document handling
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
+              <div className="text-center py-20">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-300">
+                  <Icon size={32} />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Tool Coming Soon</h2>
+                <p className="text-slate-500 dark:text-slate-400">
+                  We're working on implementing this tool. Check back soon!
                 </p>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-300">
-                <Icon size={32} />
-              </div>
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Tool Coming Soon</h2>
-              <p className="text-slate-500 dark:text-slate-400">
-                We're working on implementing this tool. Check back soon!
-              </p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
