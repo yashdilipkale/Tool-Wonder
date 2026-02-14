@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
-import { useCredits } from '../CreditContext';
+import { useTheme } from '../ThemeContext';
 
 const Signup: React.FC = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+  const { theme } = useTheme();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{name?: string; email?: string; password?: string; confirmPassword?: string; general?: string}>({});
   const [touched, setTouched] = useState<{name?: boolean; email?: boolean; password?: boolean; confirmPassword?: boolean}>({});
   const { signup, loading } = useAuth();
-  const { addCredits } = useCredits();
   const navigate = useNavigate();
 
   const validateName = (name: string) => {
@@ -151,7 +151,7 @@ const Signup: React.FC = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400" />
+                    <User className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="name"
@@ -159,7 +159,7 @@ const Signup: React.FC = () => {
                     type="text"
                     autoComplete="name"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                       errors.name ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder="Enter your full name"

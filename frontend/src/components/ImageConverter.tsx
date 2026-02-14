@@ -95,6 +95,49 @@ const ImageConverter: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Alternative download method using toBlob (as requested)
+  const downloadWithBlob = async () => {
+    if (!selectedFile || !previewUrl) return;
+
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = previewUrl;
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      
+      if (!ctx) {
+        throw new Error('Canvas context not available');
+      }
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Use toBlob method as requested
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${selectedFile.name.replace(/\.[^/.]+$/, '')}.${targetFormat}`;
+          link.click();
+          
+          // Clean up the object URL
+          setTimeout(() => URL.revokeObjectURL(link.href), 100);
+        }
+      }, "image/jpeg");
+    } catch (err) {
+      setError('Failed to download image. Please try again.');
+      console.error('Download error:', err);
+    }
+  };
+
   const resetConverter = () => {
     setSelectedFile(null);
     setPreviewUrl(null);

@@ -1,8 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Zap, Crown } from 'lucide-react';
+import { ArrowRight, Star, Zap, Crown, Heart } from 'lucide-react';
 import { gsap } from 'gsap';
 import { Tool } from '../types';
+import { addFavorite } from '../firebase/favorites';
+import { useAuth } from '../AuthContext';
 
 interface ToolCardProps {
   tool: Tool;
@@ -74,7 +76,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
   }, []);
 
   return (
-    <Link to={`/tool/${tool.id}`}>
+    <Link to={`/tool/${tool.id}`} onClick={() => console.log(`Navigating to tool: ${tool.id}`)}>
       <div
         ref={cardRef}
         className="group relative bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden cursor-pointer"
@@ -100,6 +102,16 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
                 <Star size={10} /> HOT
               </span>
             )}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                addFavorite({ id: tool.id, name: tool.name });
+              }}
+              className="p-1.5 rounded-lg bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-600 hover:text-white dark:hover:bg-pink-600 dark:hover:text-white transition-colors"
+              title="Add to Favorites"
+            >
+              <Heart size={16} />
+            </button>
           </div>
         </div>
 

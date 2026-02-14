@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
-import { useCredits } from '../CreditContext';
+import { useTheme } from '../ThemeContext';
 
 const Login: React.FC = () => {
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{email?: string; password?: string; general?: string}>({});
   const [touched, setTouched] = useState<{email?: boolean; password?: boolean}>({});
   const { login, loading } = useAuth();
-  const { addCredits } = useCredits();
   const navigate = useNavigate();
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,8 +71,6 @@ const Login: React.FC = () => {
     }
   };
 
-
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -89,8 +87,6 @@ const Login: React.FC = () => {
             </p>
           </div>
 
-
-
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
@@ -99,7 +95,7 @@ const Login: React.FC = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400" />
+                    <Mail className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="email"
@@ -107,7 +103,7 @@ const Login: React.FC = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                       errors.email ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder="Enter your email"
@@ -127,7 +123,7 @@ const Login: React.FC = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400" />
+                    <Lock className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="password"
@@ -135,7 +131,7 @@ const Login: React.FC = () => {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                       errors.password ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
                     }`}
                     placeholder="Enter your password"
@@ -175,8 +171,6 @@ const Login: React.FC = () => {
                 )}
               </button>
             </div>
-
-
 
             <div className="text-center">
               <p className="text-sm text-slate-600 dark:text-slate-400">

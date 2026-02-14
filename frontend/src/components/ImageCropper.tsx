@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Download, Image as ImageIcon, ArrowRight, Crop } from 'lucide-react';
+import Cropper from 'cropperjs';
 
 interface CropArea {
   x: number;
@@ -212,6 +213,24 @@ const ImageCropper: React.FC = () => {
     } finally {
       setIsCropping(false);
     }
+  };
+
+  // CropperJS integration function
+  const useCropperJS = () => {
+    if (!originalImage) return;
+
+    // Create a temporary image element for cropperjs
+    const tempImage = document.createElement('img');
+    tempImage.src = originalImage.src;
+    
+    // Create cropper instance
+    const cropper = new Cropper(tempImage);
+    
+    // Log the cropper instance for demonstration
+    console.log('CropperJS instance created:', cropper);
+    
+    // You can use cropper methods here, for example:
+    // cropper.getCroppedCanvas().toDataURL()
   };
 
   const downloadCroppedImage = () => {

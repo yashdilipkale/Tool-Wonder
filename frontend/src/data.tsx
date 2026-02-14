@@ -1,10 +1,8 @@
 import {
   Image, FileText, Calculator, Type, Code, Palette, Search, Wrench,
-  Maximize, Minimize, Crop, ScanText, RefreshCcw, File, FileArchive,
-  Scissors, Lock, PenTool, Sigma, Calendar, Activity, Home, Percent,
+  Maximize, Minimize, Crop, ScanText, RefreshCcw, Lock, Sigma, Calendar, Activity, Home, Percent,
   Coins, AlignLeft, List, SortAsc, ArrowRightLeft, Lock as LockIcon,
-  FileCode, Brackets, Database, Link, Pipette, Regex, Eye, Layers,
-  Grid, BarChart, Tag, QrCode, Barcode, Fingerprint, Ruler, Globe,
+  FileCode, Brackets, Database, Link, Pipette, Regex, Eye, Layers, BarChart, Tag, QrCode, Barcode, Fingerprint, Ruler, Globe,
   Shuffle, Zap
 } from 'lucide-react';
 import { CategoryDefinition, Tool } from './types';
@@ -114,21 +112,16 @@ export const TOOLS: Tool[] = [
   { id: 'col-pick', name: 'Image Color Picker', description: 'Extract palettes from uploaded images', icon: Pipette, category: 'color' },
   { id: 'col-grad', name: 'Gradient Generator', description: 'Create beautiful CSS gradients', icon: Layers, category: 'color', isPopular: true },
   { id: 'col-cont', name: 'Contrast Checker', description: 'Check accessibility contrast ratios', icon: Eye, category: 'color' },
-  { id: 'col-pal', name: 'Palette Generator', description: 'Generate harmonious color schemes', icon: Grid, category: 'color' },
-  { id: 'col-pro', name: 'Professional Color Palettes', description: 'Premium color palettes for designers', icon: Palette, category: 'color', creditCost: 5 },
 
   // SEO
   { id: 'seo-kw', name: 'Keyword Density', description: 'Analyze keyword frequency in content', icon: BarChart, category: 'seo' },
   { id: 'seo-meta', name: 'Meta Tag Analyzer', description: 'Analyze and optimize SEO meta tags', icon: Tag, category: 'seo' },
-  { id: 'seo-back', name: 'Backlink Checker', description: 'Analyze backlinks and domain authority', icon: Link, category: 'seo' },
-  { id: 'seo-key', name: 'Keyword Research', description: 'Find trending keywords and competition analysis', icon: Search, category: 'seo' },
-  { id: 'seo-speed', name: 'Website Speed Analyzer', description: 'Analyze and optimize website performance', icon: Activity, category: 'seo' },
+
 
   // Utility
   { id: 'util-qr', name: 'QR Code Generator', description: 'Create and scan custom QR codes', icon: QrCode, category: 'utility', isPopular: true, creditCost: 5 },
   { id: 'util-bar', name: 'Barcode Generator', description: 'Generate product barcodes easily', icon: Barcode, category: 'utility', creditCost: 5 },
   { id: 'util-uuid', name: 'UUID Generator', description: 'Generate unique identifiers (v4)', icon: Fingerprint, category: 'utility' },
-  { id: 'util-unit', name: 'Unit Converter', description: 'Convert length, weight, temperature', icon: Ruler, category: 'utility' },
   { id: 'util-time', name: 'Time Zone', description: 'Convert time across different zones', icon: Globe, category: 'utility', creditCost: 5 },
   { id: 'util-pass', name: 'Password Gen', description: 'Generate strong, secure passwords', icon: Shuffle, category: 'utility', isPopular: true, creditCost: 5 },
   { id: 'util-pass-mgr', name: 'Advanced Password Manager', description: 'Generate, store, and manage secure passwords', icon: Lock, category: 'utility' },

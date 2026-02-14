@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Pipette, Upload, Copy, Palette, Eye, EyeOff } from 'lucide-react';
+import { useTheme } from "../ThemeContext";
 
 interface ColorInfo {
   hex: string;
@@ -10,6 +11,7 @@ interface ColorInfo {
 }
 
 const ImageColorPicker: React.FC = () => {
+  const { theme } = useTheme();
   const [image, setImage] = useState<string | null>(null);
   const [colors, setColors] = useState<ColorInfo[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,368 +20,151 @@ const ImageColorPicker: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const rgbToHex = (r: number, g: number, b: number): string => {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  };
+  const rgbToHex = (r: number, g: number, b: number) =>
+    "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 
-  const rgbToHsl = (r: number, g: number, b: number): string => {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
+  const rgbToHsl = (r: number, g: number, b: number) => {
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    let h=0,s=0,l=(max+min)/2;
+    if(max!==min){
+      const d=max-min;
+      s=l>0.5? d/(2-max-min): d/(max+min);
+      switch(max){
+        case r:h=(g-b)/d+(g<b?6:0);break;
+        case g:h=(b-r)/d+2;break;
+        case b:h=(r-g)/d+4;break;
       }
-      h /= 6;
+      h/=6;
     }
-
-    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+    return `hsl(${Math.round(h*360)}, ${Math.round(s*100)}%, ${Math.round(l*100)}%)`;
   };
 
   const extractColors = useCallback(async (imageSrc: string) => {
     setIsProcessing(true);
     setError('');
-
     try {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
+      const img=new Image();
+      img.src=imageSrc;
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej});
 
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = imageSrc;
-      });
+      const canvas=canvasRef.current!;
+      const ctx=canvas.getContext('2d')!;
+      const maxSize=200;
+      let {width,height}=img;
+      if(width>height){ if(width>maxSize){ height=(height*maxSize)/width; width=maxSize;}}
+      else{ if(height>maxSize){ width=(width*maxSize)/height; height=maxSize;}}
 
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+      canvas.width=width;
+      canvas.height=height;
+      ctx.drawImage(img,0,0,width,height);
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      const {data}=ctx.getImageData(0,0,width,height);
+      const colorCount:Record<string,number>={};
 
-      // Set canvas size to image size (but limit for performance)
-      const maxSize = 200;
-      let { width, height } = img;
-
-      if (width > height) {
-        if (width > maxSize) {
-          height = (height * maxSize) / width;
-          width = maxSize;
-        }
-      } else {
-        if (height > maxSize) {
-          width = (width * maxSize) / height;
-          height = maxSize;
-        }
+      for(let i=0;i<data.length;i+=16){
+        const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+        if(a<128) continue;
+        const hex=rgbToHex(r,g,b);
+        colorCount[hex]=(colorCount[hex]||0)+1;
       }
 
-      canvas.width = width;
-      canvas.height = height;
-
-      // Draw image to canvas
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Get image data
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
-
-      // Count colors
-      const colorCount: { [key: string]: number } = {};
-
-      // Sample every 4th pixel for performance
-      for (let i = 0; i < data.length; i += 16) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const alpha = data[i + 3];
-
-        // Skip transparent pixels
-        if (alpha < 128) continue;
-
-        const hex = rgbToHex(r, g, b);
-        colorCount[hex] = (colorCount[hex] || 0) + 1;
-      }
-
-      // Convert to array and sort by frequency
-      const totalPixels = Object.values(colorCount).reduce((sum, count) => sum + count, 0);
-      const colorArray: ColorInfo[] = Object.entries(colorCount)
-        .map(([hex, count]) => ({
+      const total=Object.values(colorCount).reduce((a,b)=>a+b,0);
+      const result:ColorInfo[]=Object.entries(colorCount)
+        .map(([hex,count])=>({
           hex,
-          rgb: `rgb(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)})`,
-          hsl: rgbToHsl(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)),
+          rgb:`rgb(${parseInt(hex.slice(1,3),16)}, ${parseInt(hex.slice(3,5),16)}, ${parseInt(hex.slice(5,7),16)})`,
+          hsl:rgbToHsl(parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)),
           count,
-          percentage: (count / totalPixels) * 100
+          percentage:(count/total)*100
         }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20); // Limit to top 20 colors
+        .sort((a,b)=>b.count-a.count)
+        .slice(0,20);
 
-      setColors(colorArray);
-    } catch (err) {
-      setError('Failed to process image: ' + (err as Error).message);
-    } finally {
+      setColors(result);
+    } catch(err){
+      setError('Image processing failed');
+    } finally{
       setIsProcessing(false);
     }
-  }, []);
+  },[]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      setError('Image size should be less than 10MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setImage(result);
-      extractColors(result);
+  const handleUpload=(e:React.ChangeEvent<HTMLInputElement>)=>{
+    const file=e.target.files?.[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const res=e.target?.result as string;
+      setImage(res);
+      extractColors(res);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setImage(result);
-        extractColors(result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-    }
-  };
-
-  const copyPalette = async () => {
-    const paletteText = colors.map(color => `${color.hex} (${color.rgb})`).join('\n');
-    await copyToClipboard(paletteText);
-  };
+  const copy=(text:string)=>navigator.clipboard.writeText(text);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <Pipette className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+    <div className="max-w-6xl mx-auto px-4 py-10">
+
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg mb-4">
+          <Pipette/>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Image Color Picker</h2>
-          <p className="text-slate-600 dark:text-slate-400">Extract color palettes from uploaded images</p>
-        </div>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          Image Color Picker
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">
+          Extract professional color palettes instantly from any image
+        </p>
       </div>
 
-      <div className="space-y-6">
-        {/* Upload Area */}
-        <div
-          className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {image ? (
-            <div className="space-y-4">
-              <div className="relative inline-block">
-                <img
-                  src={image}
-                  alt="Uploaded"
-                  className={`max-w-full max-h-48 rounded-lg shadow-lg ${showPreview ? '' : 'hidden'}`}
-                />
-                {!showPreview && (
-                  <div className="w-48 h-32 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center">
-                    <EyeOff className="w-8 h-8 text-slate-500" />
-                  </div>
-                )}
+      {/* Upload */}
+      <div
+        onClick={()=>fileInputRef.current?.click()}
+        className="border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-indigo-500 rounded-2xl p-10 text-center cursor-pointer transition-colors"
+      >
+        {image ? (
+          <img src={image} className="mx-auto max-h-60 rounded-xl shadow"/>
+        ):( 
+          <div className="space-y-3">
+            <Upload className="mx-auto text-slate-400 dark:text-slate-500" size={40}/>
+            <p className="font-medium text-slate-900 dark:text-white">Click to Upload Image</p>
+          </div>
+        )}
+        <input ref={fileInputRef} hidden type="file" accept="image/*" onChange={handleUpload}/>
+      </div>
+
+      {/* Loading */}
+      {isProcessing && (
+        <div className="text-center mt-6 text-slate-900 dark:text-white">Processing...</div>
+      )}
+
+      {/* Palette */}
+      {colors.length>0 && (
+        <div className="mt-10">
+          <h3 className="text-xl font-semibold mb-5 flex items-center gap-2 text-slate-900 dark:text-white">
+            <Palette/> Color Palette
+          </h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {colors.map((c,i)=>(
+              <div key={i} className="rounded-xl p-3 bg-white dark:bg-slate-800 shadow hover:shadow-lg transition-colors">
+                <div style={{background:c.hex}} className="h-16 rounded mb-2"/>
+                <div className="text-xs font-mono text-slate-900 dark:text-white">{c.hex}</div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowPreview(!showPreview);
-                  }}
-                  className="absolute top-2 right-2 p-1 bg-white dark:bg-slate-800 rounded-full shadow-md hover:shadow-lg transition-shadow"
+                  onClick={()=>copy(c.hex)}
+                  className="mt-2 w-full text-xs py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
                 >
-                  {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Copy
                 </button>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Click to upload a different image or drag & drop
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Upload className="w-12 h-12 text-slate-400 mx-auto" />
-              <div>
-                <p className="text-lg font-medium text-slate-900 dark:text-white">
-                  Upload an image
-                </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Drag & drop an image here, or click to browse
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
-                  Supports JPG, PNG, GIF, WEBP (max 10MB)
-                </p>
-              </div>
-            </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
+            ))}
+          </div>
         </div>
+      )}
 
-        {/* Processing Indicator */}
-        {isProcessing && (
-          <div className="text-center py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Extracting colors...</p>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Color Palette */}
-        {colors.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Color Palette ({colors.length} colors)
-              </h3>
-              <button
-                onClick={copyPalette}
-                className="flex items-center gap-2 px-3 py-1 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-slate-700 dark:text-slate-300"
-              >
-                <Copy className="w-4 h-4" />
-                Copy All
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {colors.map((color, index) => (
-                <div key={index} className="bg-white dark:bg-slate-700 rounded-lg p-3 shadow-sm border border-slate-200 dark:border-slate-600">
-                  <div
-                    className="w-full h-16 rounded-md mb-2 border border-slate-300 dark:border-slate-500"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  <div className="space-y-1">
-                    <div className="text-xs font-mono text-slate-900 dark:text-white">
-                      {color.hex}
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      {Math.round(color.percentage)}%
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => copyToClipboard(color.hex)}
-                        className="flex-1 text-xs px-2 py-1 bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 rounded text-slate-700 dark:text-slate-300"
-                        title="Copy HEX"
-                      >
-                        HEX
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(color.rgb)}
-                        className="flex-1 text-xs px-2 py-1 bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 rounded text-slate-700 dark:text-slate-300"
-                        title="Copy RGB"
-                      >
-                        RGB
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Detailed Color List */}
-            <div className="mt-6">
-              <h4 className="text-md font-semibold text-slate-900 dark:text-white mb-3">Detailed Color Information</h4>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {colors.map((color, index) => (
-                  <div key={index} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-700 rounded">
-                    <div
-                      className="w-8 h-8 rounded border border-slate-300 dark:border-slate-500 flex-shrink-0"
-                      style={{ backgroundColor: color.hex }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-mono text-slate-900 dark:text-white truncate">
-                        {color.hex}
-                      </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400 truncate">
-                        {color.rgb} • {color.hsl}
-                      </div>
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-500">
-                      {color.count} px ({color.percentage.toFixed(1)}%)
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => copyToClipboard(color.hex)}
-                        className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 rounded text-blue-700 dark:text-blue-300"
-                      >
-                        HEX
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(color.rgb)}
-                        className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 hover:bg-green-200 dark:hover:bg-green-800 rounded text-green-700 dark:text-green-300"
-                      >
-                        RGB
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(color.hsl)}
-                        className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900 hover:bg-purple-200 dark:hover:bg-purple-800 rounded text-purple-700 dark:text-purple-300"
-                      >
-                        HSL
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Hidden canvas for processing */}
-      <canvas ref={canvasRef} className="hidden" />
+      <canvas ref={canvasRef} className="hidden"/>
     </div>
   );
 };

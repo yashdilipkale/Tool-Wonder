@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Download, Image as ImageIcon, ArrowRight, Minimize } from 'lucide-react';
+import Compressor from 'compressorjs';
 
 const ImageCompressor: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -34,6 +35,36 @@ const ImageCompressor: React.FC = () => {
   };
 
   const compressImage = async () => {
+    if (!selectedFile) return;
+
+    setIsCompressing(true);
+    setError(null);
+
+    try {
+      // Use compressorjs library for better compression
+      new Compressor(selectedFile, {
+        quality: compressionQuality / 100,
+        success(result) {
+          // Convert the compressed file to preview URL
+          const compressedUrl = URL.createObjectURL(result);
+          setCompressedPreview(compressedUrl);
+          setCompressedSize(result.size);
+        },
+        error(err) {
+          setError('Failed to compress image. Please try again.');
+          console.error('Compression error:', err);
+        }
+      });
+    } catch (err) {
+      setError('Failed to compress image. Please try again.');
+      console.error('Compression error:', err);
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  // Image resizing function with canvas
+  const resizeImage = async () => {
     if (!selectedFile || !originalPreview) return;
 
     setIsCompressing(true);
@@ -56,37 +87,22 @@ const ImageCompressor: React.FC = () => {
         throw new Error('Canvas context not available');
       }
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+      // Resize canvas to 300x300 as requested
+      canvas.width = 300;
+      canvas.height = 300;
+      ctx.drawImage(img, 0, 0, 300, 300);
 
-      let mimeType: string;
-      const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
-
-      switch (fileExtension) {
-        case 'png':
-          mimeType = 'image/png';
-          break;
-        case 'webp':
-          mimeType = 'image/webp';
-          break;
-        case 'jpg':
-        case 'jpeg':
-        default:
-          mimeType = 'image/jpeg';
-          break;
-      }
-
-      const quality = compressionQuality / 100;
-      const compressedDataUrl = canvas.toDataURL(mimeType, quality);
-
-      // Calculate compressed size
-      const compressedBlob = await fetch(compressedDataUrl).then(res => res.blob());
-      setCompressedSize(compressedBlob.size);
-      setCompressedPreview(compressedDataUrl);
+      // Convert canvas to blob for download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const resizedUrl = URL.createObjectURL(blob);
+          setCompressedPreview(resizedUrl);
+          setCompressedSize(blob.size);
+        }
+      }, 'image/jpeg', 0.8);
     } catch (err) {
-      setError('Failed to compress image. Please try again.');
-      console.error('Compression error:', err);
+      setError('Failed to resize image. Please try again.');
+      console.error('Resize error:', err);
     } finally {
       setIsCompressing(false);
     }
@@ -199,23 +215,43 @@ const ImageCompressor: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={compressImage}
-              disabled={isCompressing}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isCompressing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Compressing...
-                </>
-              ) : (
-                <>
-                  <ArrowRight size={16} />
-                  Compress Image
-                </>
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={compressImage}
+                disabled={isCompressing}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isCompressing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Compressing...
+                  </>
+                ) : (
+                  <>
+                    <ArrowRight size={16} />
+                    Compress Image
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={resizeImage}
+                disabled={isCompressing}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isCompressing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Resizing...
+                  </>
+                ) : (
+                  <>
+                    <Minimize size={16} />
+                    Resize to 300x300
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

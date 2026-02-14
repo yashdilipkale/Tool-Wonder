@@ -1,6 +1,35 @@
 import React, { useState } from 'react';
 import { Activity, Calculator, Scale, Crown } from 'lucide-react';
 
+export const calculateBMIAdvanced = (weight, height) => {
+  const bmi = weight / (height * height);
+  let category = "";
+  let suggestion = "";
+
+  if (bmi < 18.5) {
+    category = "Underweight";
+    suggestion = "Increase calorie intake and maintain balanced diet.";
+  } 
+  else if (bmi < 25) {
+    category = "Normal";
+    suggestion = "Maintain healthy lifestyle and balanced diet.";
+  } 
+  else if (bmi < 30) {
+    category = "Overweight";
+    suggestion = "Regular exercise and healthy diet recommended.";
+  } 
+  else {
+    category = "Obese";
+    suggestion = "Consult doctor and start weight management plan.";
+  }
+
+  return {
+    bmi: bmi.toFixed(2),
+    category,
+    suggestion
+  };
+};
+
 const BMICalculator: React.FC = () => {
   const [height, setHeight] = useState<string>('');
   const [weight, setWeight] = useState<string>('');
@@ -110,19 +139,13 @@ const BMICalculator: React.FC = () => {
   const idealWeight = getIdealWeightRange();
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-2 space-y-4">
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
             <Activity size={20} />
           </div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">BMI Calculator</h2>
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
-              <Crown size={12} />
-              Premium
-            </span>
-          </div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">BMI Calculator</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

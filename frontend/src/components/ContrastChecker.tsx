@@ -1,358 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Eye, CheckCircle, XCircle, Info, ArrowLeftRight, RotateCcw } from "lucide-react";
+import { useTheme } from "../ThemeContext";
 
 interface ContrastResult {
   ratio: number;
-  aa: {
-    normal: boolean;
-    large: boolean;
-  };
-  aaa: {
-    normal: boolean;
-    large: boolean;
-  };
-  level: 'Fail' | 'AA' | 'AAA';
+  level: "Fail" | "AA" | "AAA";
   description: string;
 }
 
 const ContrastChecker: React.FC = () => {
-  const [foreground, setForeground] = useState('#000000');
-  const [background, setBackground] = useState('#ffffff');
+  const { theme } = useTheme();
+  const [foreground, setForeground] = useState("#000000");
+  const [background, setBackground] = useState("#ffffff");
   const [result, setResult] = useState<ContrastResult | null>(null);
 
-  // Calculate relative luminance
-  const getRelativeLuminance = (hex: string): number => {
+  const hexToRgb = (hex: string) => {
+    const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return res
+      ? {
+          r: parseInt(res[1], 16),
+          g: parseInt(res[2], 16),
+          b: parseInt(res[3], 16),
+        }
+      : null;
+  };
+
+  const luminance = (hex: string) => {
     const rgb = hexToRgb(hex);
     if (!rgb) return 0;
 
-    const { r, g, b } = rgb;
-
-    // Convert to linear RGB
     const toLinear = (c: number) => {
-      c = c / 255;
+      c /= 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     };
 
-    const rLinear = toLinear(r);
-    const gLinear = toLinear(g);
-    const bLinear = toLinear(b);
-
-    // Calculate luminance
-    return 0.2126 * rLinear + 0.7152 * gLinear + 0.0722 * bLinear;
+    return (
+      0.2126 * toLinear(rgb.r) +
+      0.7152 * toLinear(rgb.g) +
+      0.0722 * toLinear(rgb.b)
+    );
   };
 
-  // Calculate contrast ratio
-  const getContrastRatio = (color1: string, color2: string): number => {
-    const lum1 = getRelativeLuminance(color1);
-    const lum2 = getRelativeLuminance(color2);
-
-    const lighter = Math.max(lum1, lum2);
-    const darker = Math.min(lum1, lum2);
-
+  const contrastRatio = (c1: string, c2: string) => {
+    const l1 = luminance(c1);
+    const l2 = luminance(c2);
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
     return (lighter + 0.05) / (darker + 0.05);
   };
 
-  // Evaluate contrast against WCAG guidelines
-  const evaluateContrast = (ratio: number): ContrastResult => {
-    const aa = {
-      normal: ratio >= 4.5,
-      large: ratio >= 3.0
-    };
+  useEffect(() => {
+    const ratio = contrastRatio(foreground, background);
+    let level: "Fail" | "AA" | "AAA" = "Fail";
+    let description = "Fails accessibility standards";
 
-    const aaa = {
-      normal: ratio >= 7.0,
-      large: ratio >= 4.5
-    };
-
-    let level: 'Fail' | 'AA' | 'AAA';
-    let description: string;
-
-    if (aaa.normal) {
-      level = 'AAA';
-      description = 'Passes AAA level for both normal and large text';
-    } else if (aa.normal) {
-      level = 'AA';
-      description = 'Passes AA level for normal text';
-    } else if (aa.large) {
-      level = 'AA';
-      description = 'Passes AA level for large text only';
-    } else {
-      level = 'Fail';
-      description = 'Fails WCAG accessibility standards';
+    if (ratio >= 7) {
+      level = "AAA";
+      description = "Excellent contrast (AAA)";
+    } else if (ratio >= 4.5) {
+      level = "AA";
+      description = "Good contrast (AA)";
     }
 
-    return {
-      ratio: Math.round(ratio * 100) / 100,
-      aa,
-      aaa,
+    setResult({
+      ratio: Number(ratio.toFixed(2)),
       level,
-      description
-    };
-  };
-
-  // Convert HEX to RGB
-  const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  };
-
-  // Swap colors
-  const swapColors = () => {
-    const temp = foreground;
-    setForeground(background);
-    setBackground(temp);
-  };
-
-  // Reset to default
-  const resetColors = () => {
-    setForeground('#000000');
-    setBackground('#ffffff');
-  };
-
-  // Calculate contrast when colors change
-  useEffect(() => {
-    const ratio = getContrastRatio(foreground, background);
-    const evaluation = evaluateContrast(ratio);
-    setResult(evaluation);
+      description,
+    });
   }, [foreground, background]);
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'AAA': return 'text-green-600 dark:text-green-400';
-      case 'AA': return 'text-blue-600 dark:text-blue-400';
-      case 'Fail': return 'text-red-600 dark:text-red-400';
-      default: return 'text-slate-600 dark:text-slate-400';
-    }
+  const swap = () => {
+    const t = foreground;
+    setForeground(background);
+    setBackground(t);
   };
 
-  const getLevelBgColor = (level: string) => {
-    switch (level) {
-      case 'AAA': return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
-      case 'AA': return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
-      case 'Fail': return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
-      default: return 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600';
-    }
+  const reset = () => {
+    setForeground("#000000");
+    setBackground("#ffffff");
   };
 
-  const getLevelIcon = (level: string) => {
-    switch (level) {
-      case 'AAA': return <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />;
-      case 'AA': return <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
-      case 'Fail': return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
-      default: return <AlertTriangle className="w-5 h-5 text-slate-600 dark:text-slate-400" />;
-    }
+  const levelColor = {
+    AAA: "text-green-600",
+    AA: "text-blue-600",
+    Fail: "text-red-600",
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
+
+      {/* Header */}
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg mb-4">
+          <Eye size={28} />
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Contrast Checker</h2>
-          <p className="text-slate-600 dark:text-slate-400">Check WCAG accessibility contrast ratios</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          Contrast Checker
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Check WCAG accessibility contrast instantly
+        </p>
+      </div>
+
+      {/* Inputs */}
+      <div className="grid md:grid-cols-2 gap-8">
+
+        {/* Foreground */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 space-y-4">
+          <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Text Color</h3>
+
+          <div className="flex gap-3">
+            <input
+              type="color"
+              value={foreground}
+              onChange={(e) => setForeground(e.target.value)}
+              className="w-14 h-12 rounded-lg"
+            />
+            <input
+              value={foreground}
+              onChange={(e) => setForeground(e.target.value)}
+              className="flex-1 border border-slate-200 dark:border-slate-600 rounded-lg p-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Background */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 space-y-4">
+          <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Background Color</h3>
+
+          <div className="flex gap-3">
+            <input
+              type="color"
+              value={background}
+              onChange={(e) => setBackground(e.target.value)}
+              className="w-14 h-12 rounded-lg"
+            />
+            <input
+              value={background}
+              onChange={(e) => setBackground(e.target.value)}
+              className="flex-1 border border-slate-200 dark:border-slate-600 rounded-lg p-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white transition-colors"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Color Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Foreground Color */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Foreground (Text) Color
-            </label>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={foreground}
-                  onChange={(e) => setForeground(e.target.value)}
-                  className="w-12 h-10 rounded border border-slate-300 dark:border-slate-600 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={foreground}
-                  onChange={(e) => setForeground(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-mono text-sm"
-                  placeholder="#000000"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-8 h-8 rounded border border-slate-300 dark:border-slate-500"
-                  style={{ backgroundColor: foreground }}
-                />
-                <span className="text-sm text-slate-600 dark:text-slate-400">
-                  Text preview on background
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* Buttons */}
+      <div className="flex flex-wrap justify-center gap-4">
+        <button
+          onClick={swap}
+          className="flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-700 text-white hover:bg-slate-800 transition-colors"
+        >
+          <ArrowLeftRight size={16} />
+          Swap Colors
+        </button>
 
-          {/* Background Color */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Background Color
-            </label>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={background}
-                  onChange={(e) => setBackground(e.target.value)}
-                  className="w-12 h-10 rounded border border-slate-300 dark:border-slate-600 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={background}
-                  onChange={(e) => setBackground(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-mono text-sm"
-                  placeholder="#ffffff"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-8 h-8 rounded border border-slate-300 dark:border-slate-500"
-                  style={{ backgroundColor: background }}
-                />
-                <span className="text-sm text-slate-600 dark:text-slate-400">
-                  Background color
-                </span>
-              </div>
-            </div>
+        <button
+          onClick={reset}
+          className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+        >
+          <RotateCcw size={16} />
+          Reset
+        </button>
+      </div>
+
+      {/* Preview */}
+      <div
+        className="rounded-3xl shadow-xl p-12 text-center text-xl font-semibold"
+        style={{ background: background, color: foreground }}
+      >
+        Sample Text Preview
+      </div>
+
+      {/* Result */}
+      {result && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6 text-center">
+          <div className={`text-4xl font-bold ${levelColor[result.level]}`}>
+            {result.ratio}:1
           </div>
+          <p className="text-lg mt-2 text-slate-900 dark:text-white">{result.description}</p>
         </div>
+      )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={swapColors}
-            className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Swap Colors
-          </button>
-          <button
-            onClick={resetColors}
-            className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Reset
-          </button>
+      {/* Info */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6 rounded-xl text-sm text-blue-700 dark:text-blue-300">
+        <div className="flex items-center gap-2 mb-2 font-semibold">
+          <Info size={16} /> WCAG Guide
         </div>
-
-        {/* Preview */}
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Preview</h3>
-          <div
-            className="p-6 rounded-lg border border-slate-300 dark:border-slate-600 min-h-[120px] flex items-center justify-center"
-            style={{ backgroundColor: background, color: foreground }}
-          >
-            <div className="text-center">
-              <p className="text-lg font-semibold mb-2">Sample Text</p>
-              <p className="text-sm opacity-80">This is how your text will appear with the selected colors.</p>
-              <p className="text-xs opacity-60 mt-2">Small text for reference</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Results */}
-        {result && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Contrast Results</h3>
-
-            {/* Main Result */}
-            <div className={`p-4 rounded-lg border ${getLevelBgColor(result.level)}`}>
-              <div className="flex items-center gap-3 mb-3">
-                {getLevelIcon(result.level)}
-                <div>
-                  <div className={`text-lg font-bold ${getLevelColor(result.level)}`}>
-                    {result.level} Level
-                  </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Contrast Ratio: {result.ratio}:1
-                  </div>
-                </div>
-              </div>
-              <p className="text-sm text-slate-700 dark:text-slate-300">
-                {result.description}
-              </p>
-            </div>
-
-            {/* Detailed Results */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* AA Level */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-2">AA Level (WCAG 2.1)</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">Normal text (≥4.5:1)</span>
-                    {result.aa.normal ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">Large text (≥3.0:1)</span>
-                    {result.aa.large ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* AAA Level */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600">
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-2">AAA Level (WCAG 2.1)</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">Normal text (≥7.0:1)</span>
-                    {result.aaa.normal ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">Large text (≥4.5:1)</span>
-                    {result.aaa.large ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* WCAG Guidelines */}
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
-            <Info className="w-4 h-4" />
-            WCAG Guidelines
-          </h3>
-          <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
-            <p><strong>AA Level:</strong> Minimum requirement for accessibility</p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Normal text: 4.5:1 contrast ratio</li>
-              <li>Large text (18pt+ or 14pt+ bold): 3.0:1 contrast ratio</li>
-            </ul>
-            <p><strong>AAA Level:</strong> Enhanced accessibility</p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Normal text: 7.0:1 contrast ratio</li>
-              <li>Large text: 4.5:1 contrast ratio</li>
-            </ul>
-          </div>
-        </div>
+        AA ≥ 4.5 | AAA ≥ 7.0
       </div>
     </div>
   );

@@ -99,6 +99,43 @@ const ImageRotator: React.FC = () => {
     }
   };
 
+  // Image rotation function with exact code requested
+  const rotateImage90Degrees = async () => {
+    if (!originalImage || !canvasRef.current) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        throw new Error('Canvas context not available');
+      }
+
+      // Set canvas size for 90-degree rotation
+      canvas.width = originalImage.height;
+      canvas.height = originalImage.width;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Apply 90-degree rotation
+      ctx.rotate(90 * Math.PI / 180);
+      ctx.drawImage(originalImage, 0, 0);
+
+      // Convert to data URL
+      const rotatedDataUrl = canvas.toDataURL('image/png');
+      setProcessedImage(rotatedDataUrl);
+    } catch (err) {
+      setError('Failed to rotate image. Please try again.');
+      console.error('Rotation error:', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const rotateClockwise = () => {
     setRotation((prev) => (prev + 90) % 360);
   };
@@ -287,6 +324,24 @@ const ImageRotator: React.FC = () => {
                 <>
                   <ArrowRight size={16} />
                   Apply Changes
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={rotateImage90Degrees}
+              disabled={isProcessing}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Rotating...
+                </>
+              ) : (
+                <>
+                  <RefreshCcw size={16} />
+                  Rotate 90°
                 </>
               )}
             </button>

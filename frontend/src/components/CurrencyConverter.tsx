@@ -1,36 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRightLeft, Calculator, DollarSign } from 'lucide-react';
-
-interface Currency {
-  code: string;
-  name: string;
-  symbol: string;
-}
-
-const currencies: Currency[] = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' },
-  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
-  { code: 'KRW', name: 'South Korean Won', symbol: '₩' },
-  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$' },
-  { code: 'MXN', name: 'Mexican Peso', symbol: '$' },
-  { code: 'RUB', name: 'Russian Ruble', symbol: '₽' },
-  { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
-  { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' },
-  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$' },
-  { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$' },
-  { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
-  { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr' },
-  { code: 'DKK', name: 'Danish Krone', symbol: 'kr' },
-];
+import CurrencyDropdown from './CurrencyDropdown';
+import { useTheme } from '../ThemeContext';
 
 const CurrencyConverter: React.FC = () => {
+  const { theme } = useTheme();
   const [amount, setAmount] = useState<string>('1');
   const [fromCurrency, setFromCurrency] = useState<string>('USD');
   const [toCurrency, setToCurrency] = useState<string>('EUR');
@@ -151,8 +125,16 @@ const CurrencyConverter: React.FC = () => {
     }
   }, [amount, fromCurrency, toCurrency]);
 
-  const fromCurrencyData = currencies.find(c => c.code === fromCurrency);
-  const toCurrencyData = currencies.find(c => c.code === toCurrency);
+  // Currency symbols mapping
+  const currencySymbols: { [key: string]: string } = {
+    'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'CAD': 'C$', 'AUD': 'A$',
+    'CHF': 'CHF', 'CNY': '¥', 'INR': '₹', 'KRW': '₩', 'BRL': 'R$', 'MXN': '$',
+    'RUB': '₽', 'ZAR': 'R', 'SGD': 'S$', 'NZD': 'NZ$', 'HKD': 'HK$',
+    'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr'
+  };
+
+  const fromCurrencySymbol = currencySymbols[fromCurrency] || fromCurrency;
+  const toCurrencySymbol = currencySymbols[toCurrency] || toCurrency;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -177,7 +159,7 @@ const CurrencyConverter: React.FC = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount"
-                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
                 min="0"
                 step="0.01"
               />
@@ -188,17 +170,7 @@ const CurrencyConverter: React.FC = () => {
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 From
               </label>
-              <select
-                value={fromCurrency}
-                onChange={(e) => setFromCurrency(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                {currencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.symbol} {currency.code} - {currency.name}
-                  </option>
-                ))}
-              </select>
+              <CurrencyDropdown value={fromCurrency} setValue={setFromCurrency} />
             </div>
 
             {/* Swap Button */}
@@ -217,17 +189,7 @@ const CurrencyConverter: React.FC = () => {
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 To
               </label>
-              <select
-                value={toCurrency}
-                onChange={(e) => setToCurrency(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                {currencies.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.symbol} {currency.code} - {currency.name}
-                  </option>
-                ))}
-              </select>
+              <CurrencyDropdown value={toCurrency} setValue={setToCurrency} />
             </div>
 
             <div className="flex gap-3">
@@ -271,11 +233,11 @@ const CurrencyConverter: React.FC = () => {
                 {/* Conversion Result */}
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 text-center">
                   <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {fromCurrencyData?.symbol}{amount} {fromCurrency}
+                    {fromCurrencySymbol}{amount} {fromCurrency}
                   </div>
                   <div className="text-green-600 dark:text-green-400 mb-4">=</div>
                   <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {toCurrencyData?.symbol}{result.toFixed(2)} {toCurrency}
+                    {toCurrencySymbol}{result.toFixed(2)} {toCurrency}
                   </div>
                   <div className="text-sm text-green-800 dark:text-green-200">
                     1 {fromCurrency} = {(result / parseFloat(amount)).toFixed(4)} {toCurrency}
@@ -308,10 +270,10 @@ const CurrencyConverter: React.FC = () => {
                     {[10, 50, 100, 500, 1000].map((quickAmount) => (
                       <div key={quickAmount} className="text-center p-2 bg-white dark:bg-slate-700 rounded">
                         <div className="font-semibold text-blue-900 dark:text-blue-100">
-                          {fromCurrencyData?.symbol}{quickAmount}
+                          {fromCurrencySymbol}{quickAmount}
                         </div>
                         <div className="text-blue-700 dark:text-blue-300">
-                          = {toCurrencyData?.symbol}{((result / parseFloat(amount)) * quickAmount).toFixed(2)}
+                          = {toCurrencySymbol}{((result / parseFloat(amount)) * quickAmount).toFixed(2)}
                         </div>
                       </div>
                     ))}

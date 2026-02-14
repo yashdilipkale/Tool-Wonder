@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { Icon: Github, href: 'https://github.com/yashdilipkale/'},
+                { Icon: Github, href: 'https://github.com/yashkale2006/Tool-Wonder'},
                 { Icon: Linkedin, href: 'https://www.linkedin.com/in/yashkale07/' }
               ].map(({ Icon, href }, i) => (
                 <a key={i} href={href} className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-all">
@@ -53,8 +53,8 @@ const Footer: React.FC = () => {
             <ul className="space-y-4">
               <li><a href="#image-tools" className="hover:text-primary-400 transition-colors">Image Tools</a></li>
               <li><a href="#text-tools" className="hover:text-primary-400 transition-colors">Text Tools</a></li>
-              <li><a href="#dev-tools" className="hover:text-primary-400 transition-colors">Developer Tools</a></li>
-              <li><a href="#calculators" className="hover:text-primary-400 transition-colors">Calculators</a></li>
+              <li><a href="#developer-tools" className="hover:text-primary-400 transition-colors">Developer Tools</a></li>
+              <li><a href="#calculator-tools" className="hover:text-primary-400 transition-colors">Calculators</a></li>
             </ul>
           </div>
 

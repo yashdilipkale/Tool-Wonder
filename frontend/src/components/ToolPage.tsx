@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle, Coins } from 'lucide-react';
-import { useCredits } from '../CreditContext';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { TOOLS } from '../data';
 import WordCounter from './WordCounter';
 import ImageConverter from './ImageConverter';
@@ -32,7 +31,6 @@ import RegexTester from './RegexTester';
 import ImageColorPicker from './ImageColorPicker';
 import GradientGenerator from './GradientGenerator';
 import ContrastChecker from './ContrastChecker';
-import PaletteGenerator from './PaletteGenerator';
 import KeywordDensity from './KeywordDensity';
 import MetaTagAnalyzer from './MetaTagAnalyzer';
 import TextSummarizer from './TextSummarizer';
@@ -47,14 +45,9 @@ import DatabaseQueryBuilder from './DatabaseQueryBuilder';
 import CSSMinifier from './CSSMinifier';
 import HashGenerator from './HashGenerator';
 import CronGenerator from './CronGenerator';
-import ProfessionalColorPalettes from './ProfessionalColorPalettes';
-import BacklinkChecker from './BacklinkChecker';
-import KeywordResearch from './KeywordResearch';
-import WebsiteSpeedAnalyzer from './WebsiteSpeedAnalyzer';
 import QRCodeGenerator from './QRCodeGenerator';
 import BarcodeGenerator from './BarcodeGenerator';
 import UUIDGenerator from './UUIDGenerator';
-import UnitConverter from './UnitConverter';
 import TimeZoneConverter from './TimeZoneConverter';
 import PasswordGenerator from './PasswordGenerator';
 import AdvancedPasswordManager from './AdvancedPasswordManager';
@@ -71,10 +64,6 @@ import FuelCostCalculator from './FuelCostCalculator';
 
 const ToolPage: React.FC = () => {
   const { toolId } = useParams<{ toolId: string }>();
-  const navigate = useNavigate();
-  const { credits, deductCredits, hasEnoughCredits } = useCredits();
-  const [showCreditModal, setShowCreditModal] = useState(false);
-  const [isUsingTool, setIsUsingTool] = useState(false);
   
   const tool = TOOLS.find(t => t.id === toolId);
 
@@ -88,35 +77,6 @@ const ToolPage: React.FC = () => {
       </div>
     );
   }
-
-  // Check if tool requires credits and user has enough
-  const handleToolAccess = () => {
-    if (tool.isPremium && tool.creditCost) {
-      if (hasEnoughCredits(tool.creditCost)) {
-        // Deduct credits and allow access
-        const success = deductCredits(tool.creditCost);
-        if (success) {
-          setIsUsingTool(true);
-        } else {
-          setShowCreditModal(true);
-        }
-      } else {
-        setShowCreditModal(true);
-      }
-    } else {
-      // Free tool, allow access
-      setIsUsingTool(true);
-    }
-  };
-
-  // Auto-check credits on component mount for premium tools
-  useEffect(() => {
-    if (tool.isPremium && tool.creditCost) {
-      handleToolAccess();
-    } else {
-      setIsUsingTool(true);
-    }
-  }, [tool, credits.current]);
 
   const Icon = tool.icon;
 
@@ -223,20 +183,10 @@ const ToolPage: React.FC = () => {
             <GradientGenerator />
           ) : tool.id === 'col-cont' ? (
             <ContrastChecker />
-          ) : tool.id === 'col-pal' ? (
-            <PaletteGenerator />
-          ) : tool.id === 'col-pro' ? (
-            <ProfessionalColorPalettes />
           ) : tool.id === 'seo-kw' ? (
             <KeywordDensity />
           ) : tool.id === 'seo-meta' ? (
             <MetaTagAnalyzer />
-          ) : tool.id === 'seo-back' ? (
-            <BacklinkChecker />
-          ) : tool.id === 'seo-key' ? (
-            <KeywordResearch />
-          ) : tool.id === 'seo-speed' ? (
-            <WebsiteSpeedAnalyzer />
           ) : tool.id === 'txt-summ' ? (
             <TextSummarizer />
           ) : tool.id === 'txt-gram' ? (
@@ -255,8 +205,6 @@ const ToolPage: React.FC = () => {
             <BarcodeGenerator />
           ) : tool.id === 'util-uuid' ? (
             <UUIDGenerator />
-          ) : tool.id === 'util-unit' ? (
-            <UnitConverter />
           ) : tool.id === 'util-time' ? (
             <TimeZoneConverter />
           ) : tool.id === 'util-pass' ? (

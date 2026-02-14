@@ -1,0 +1,43 @@
+{
+  "USA": {
+    "California": 7.25,
+    "Texas": 6.25,
+    "Florida": 6,
+    "New York": 4
+  },
+  "Canada": {
+    "Ontario": 13,
+    "Alberta": 5,
+    "Quebec": 14.975
+  },
+  "India": {
+    "GST Standard": 18,
+    "Reduced": 12,
+    "Essential": 5
+  },
+  "UAE": {
+    "Dubai": 5,
+    "Abu Dhabi": 5
+  },
+  "UK": {
+    "Standard VAT": 20,
+    "Reduced": 5
+  },
+  "Australia": {
+    "GST": 10
+  },
+  "Germany": {
+    "Standard": 19,
+    "Reduced": 7
+  },
+  "France": {
+    "Standard": 20,
+    "Reduced": 10
+  },
+  "Japan": {
+    "Consumption Tax": 10
+  },
+  "Singapore": {
+    "GST": 9
+  }
+}

@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { createWorker } from 'tesseract.js';
 import { Upload, Download, Image as ImageIcon, ArrowRight, ScanText, FileText, Crown } from 'lucide-react';
 
 const ImageOCR: React.FC = () => {
@@ -7,9 +6,8 @@ const ImageOCR: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState<{ status: string; progress: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [confidence, setConfidence] = useState<number>(0);
+  const [language, setLanguage] = useState('eng');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const supportedFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff'];
@@ -25,8 +23,6 @@ const ImageOCR: React.FC = () => {
       setSelectedFile(file);
       setError(null);
       setExtractedText('');
-      setConfidence(0);
-      setProgress(null);
 
       const url = URL.createObjectURL(file);
       setImagePreview(url);
@@ -34,32 +30,29 @@ const ImageOCR: React.FC = () => {
   };
 
   const extractText = async () => {
-    if (!selectedFile || !imagePreview) return;
+    if (!selectedFile) return;
 
     setIsProcessing(true);
     setError(null);
-    setProgress({ status: 'Initializing OCR...', progress: 0 });
 
     try {
-      const worker = await createWorker('eng', 1, {
-        logger: m => {
-          setProgress({ status: m.status, progress: Math.round(m.progress * 100) });
-        }
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('apikey', 'K83680451088957');
+      formData.append('language', language);
+
+      const res = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        body: formData,
       });
 
-      // Recognize text from image
-      const { data: { text, confidence: conf } } = await worker.recognize(selectedFile);
-
-      setExtractedText(text.trim());
-      setConfidence(Math.round(conf));
-
-      await worker.terminate();
+      const data = await res.json();
+      setExtractedText(data.ParsedResults?.[0]?.ParsedText || 'No text found');
     } catch (err) {
       setError('Failed to extract text from image. Please try again.');
       console.error('OCR error:', err);
     } finally {
       setIsProcessing(false);
-      setProgress(null);
     }
   };
 
@@ -93,24 +86,10 @@ const ImageOCR: React.FC = () => {
     setSelectedFile(null);
     setImagePreview(null);
     setExtractedText('');
-    setConfidence(0);
     setError(null);
-    setProgress(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  const getConfidenceColor = (conf: number) => {
-    if (conf >= 80) return 'text-green-600 dark:text-green-400';
-    if (conf >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
-  const getConfidenceLabel = (conf: number) => {
-    if (conf >= 80) return 'High';
-    if (conf >= 60) return 'Medium';
-    return 'Low';
   };
 
   return (
@@ -121,13 +100,7 @@ const ImageOCR: React.FC = () => {
           <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
             <ScanText size={20} />
           </div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Image to Text (OCR)</h2>
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium rounded-full shadow-lg">
-              <Crown size={12} />
-              Premium
-            </span>
-          </div>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Image to Text (OCR)</h2>
         </div>
 
         <div className="space-y-4">
@@ -157,6 +130,22 @@ const ImageOCR: React.FC = () => {
             </label>
           </div>
 
+          <div className="flex flex-col sm:flex-row gap-4">
+            <label className="flex-1">
+              <span className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Language</span>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="eng">English</option>
+                <option value="hin">Hindi</option>
+                <option value="mar">Marathi</option>
+                <option value="spa">Spanish</option>
+              </select>
+            </label>
+          </div>
+
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
@@ -180,21 +169,6 @@ const ImageOCR: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              {progress && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">{progress.status}</span>
-                    <span className="text-slate-600 dark:text-slate-400">{progress.progress}%</span>
-                  </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                    <div
-                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${progress.progress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
               <button
                 onClick={extractText}
                 disabled={isProcessing}
@@ -248,13 +222,6 @@ const ImageOCR: React.FC = () => {
 
             {extractedText ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Confidence:</span>
-                  <span className={`text-sm font-medium ${getConfidenceColor(confidence)}`}>
-                    {confidence}% ({getConfidenceLabel(confidence)})
-                  </span>
-                </div>
-
                 <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 max-h-96 overflow-y-auto">
                   <pre className="text-sm text-slate-900 dark:text-white whitespace-pre-wrap font-mono">
                     {extractedText || 'No text detected in the image.'}

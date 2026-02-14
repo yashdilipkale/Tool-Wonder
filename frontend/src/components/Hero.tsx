@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, FileText, Calculator, Type, Code, Palette } from 'lucide-react';
+import { Image, Calculator, Type, Code, Palette } from 'lucide-react';
 
 const Hero: React.FC = () => {
   const quickIcons = [

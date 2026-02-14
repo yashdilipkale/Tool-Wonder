@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Menu, X, Terminal, Mail, Sun, Moon, User, LogOut, Zap, Coins } from 'lucide-react';
 import { useTheme } from '../ThemeContext';
 import { useAuth } from '../AuthContext';
-import { useCredits } from '../CreditContext';
 
 
 const Header: React.FC = () => {
@@ -12,7 +11,6 @@ const Header: React.FC = () => {
 
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
-  const { credits } = useCredits();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,7 +23,7 @@ const Header: React.FC = () => {
   const navLinks = [
     { name: 'Home', href: '#' },
     { name: 'Tools', href: '#tools' },
-    { name: 'Contact', href: '#contact' },
+
   ];
 
   return (
@@ -59,6 +57,14 @@ const Header: React.FC = () => {
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-6">
               <ul className="flex gap-8">
+                <li>
+                  <a
+                    href="/favorites"
+                    className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary-600 dark:after:bg-primary-400 after:transition-all hover:after:w-full"
+                  >
+                    Favorites
+                  </a>
+                </li>
                 {navLinks.map((link) => (
                   <li key={link.name}>
                     <a
@@ -69,6 +75,14 @@ const Header: React.FC = () => {
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href="/contact"
+                    className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary-600 dark:after:bg-primary-400 after:transition-all hover:after:w-full"
+                  >
+                    Contact
+                  </a>
+                </li>
               </ul>
 
               <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-700">
@@ -170,6 +184,15 @@ const Header: React.FC = () => {
           </div>
 
           <ul className="space-y-6">
+            <li>
+              <a
+                href="/favorites"
+                className="block text-xl font-medium text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 hover:pl-2 transition-all"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Favorites
+              </a>
+            </li>
             {navLinks.map((link) => (
               <li key={link.name}>
                 <a
@@ -181,6 +204,15 @@ const Header: React.FC = () => {
                 </a>
               </li>
             ))}
+            <li>
+              <a
+                href="/contact"
+                className="block text-xl font-medium text-slate-800 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 hover:pl-2 transition-all"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+            </li>
           </ul>
 
 
