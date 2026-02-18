@@ -10,8 +10,8 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [errors, setErrors] = useState<{name?: string; email?: string; password?: string; confirmPassword?: string; general?: string}>({});
-  const [touched, setTouched] = useState<{name?: boolean; email?: boolean; password?: boolean; confirmPassword?: boolean}>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; confirmPassword?: string; general?: string }>({});
+  const [touched, setTouched] = useState<{ name?: boolean; email?: boolean; password?: boolean; confirmPassword?: boolean }>({});
   const { signup, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -159,9 +159,8 @@ const Signup: React.FC = () => {
                     type="text"
                     autoComplete="name"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                      errors.name ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
-                    }`}
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${errors.name ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     placeholder="Enter your full name"
                     value={name}
                     onChange={handleNameChange}
@@ -187,9 +186,8 @@ const Signup: React.FC = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                      errors.email ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
-                    }`}
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${errors.email ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     placeholder="Enter your email"
                     value={email}
                     onChange={handleEmailChange}
@@ -215,9 +213,8 @@ const Signup: React.FC = () => {
                     type="password"
                     autoComplete="new-password"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                      errors.password ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
-                    }`}
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${errors.password ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     placeholder="Create a password"
                     value={password}
                     onChange={handlePasswordChange}
@@ -243,9 +240,8 @@ const Signup: React.FC = () => {
                     type="password"
                     autoComplete="new-password"
                     required
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                      errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
-                    }`}
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'
+                      }`}
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={handleConfirmPasswordChange}

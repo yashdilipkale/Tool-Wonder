@@ -37,10 +37,8 @@ import TextSummarizer from './TextSummarizer';
 import GrammarChecker from './GrammarChecker';
 import FindReplace from './FindReplace';
 import TextDiffChecker from './TextDiffChecker';
-import TextExtractor from './TextExtractor';
 import TextMerger from './TextMerger';
 import CodeFormatter from './CodeFormatter';
-import ApiTester from './ApiTester';
 import DatabaseQueryBuilder from './DatabaseQueryBuilder';
 import CSSMinifier from './CSSMinifier';
 import HashGenerator from './HashGenerator';
@@ -50,7 +48,6 @@ import BarcodeGenerator from './BarcodeGenerator';
 import UUIDGenerator from './UUIDGenerator';
 import TimeZoneConverter from './TimeZoneConverter';
 import PasswordGenerator from './PasswordGenerator';
-import AdvancedPasswordManager from './AdvancedPasswordManager';
 import FileEncryption from './FileEncryption';
 import DataBackupTool from './DataBackupTool';
 import MorseCodeConverter from './MorseCodeConverter';
@@ -167,8 +164,6 @@ const ToolPage: React.FC = () => {
             <RegexTester />
           ) : tool.id === 'dev-fmt' ? (
             <CodeFormatter />
-          ) : tool.id === 'dev-api' ? (
-            <ApiTester />
           ) : tool.id === 'dev-db' ? (
             <DatabaseQueryBuilder />
           ) : tool.id === 'dev-css' ? (
@@ -195,8 +190,6 @@ const ToolPage: React.FC = () => {
             <FindReplace />
           ) : tool.id === 'txt-diff' ? (
             <TextDiffChecker />
-          ) : tool.id === 'txt-extract' ? (
-            <TextExtractor />
           ) : tool.id === 'txt-merge' ? (
             <TextMerger />
           ) : tool.id === 'util-qr' ? (
@@ -209,8 +202,6 @@ const ToolPage: React.FC = () => {
             <TimeZoneConverter />
           ) : tool.id === 'util-pass' ? (
             <PasswordGenerator />
-          ) : tool.id === 'util-pass-mgr' ? (
-            <AdvancedPasswordManager />
           ) : tool.id === 'util-file-enc' ? (
             <FileEncryption />
           ) : tool.id === 'util-backup' ? (

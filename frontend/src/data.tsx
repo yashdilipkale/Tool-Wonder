@@ -94,14 +94,12 @@ export const TOOLS: Tool[] = [
   { id: 'txt-gram', name: 'Grammar Checker', description: 'Advanced proofreading and grammar correction', icon: Eye, category: 'text' },
   { id: 'txt-find', name: 'Find & Replace', description: 'Search and replace text with advanced options', icon: Search, category: 'text', creditCost: 3 },
   { id: 'txt-diff', name: 'Text Diff Checker', description: 'Compare two texts and highlight differences', icon: ArrowRightLeft, category: 'text' },
-  { id: 'txt-extract', name: 'Text Extractor', description: 'Extract specific patterns from text', icon: Regex, category: 'text' },
   { id: 'txt-merge', name: 'Text Merger', description: 'Combine multiple text files or strings', icon: FileText, category: 'text' },
 
   // Developer Tools
   { id: 'dev-col', name: 'Color Converter', description: 'Convert between HEX, RGB, HSL formats', icon: Pipette, category: 'developer' },
   { id: 'dev-reg', name: 'Regex Tester', description: 'Test and debug regular expressions', icon: Regex, category: 'developer', isNew: true, creditCost: 5 },
   { id: 'dev-fmt', name: 'Code Formatter', description: 'Format code in multiple programming languages', icon: FileCode, category: 'developer', creditCost: 5 },
-  { id: 'dev-api', name: 'API Tester', description: 'Test REST APIs with authentication and parameters', icon: Database, category: 'developer', creditCost: 5 },
   { id: 'dev-db', name: 'Database Query Builder', description: 'Visual SQL query builder for databases', icon: Brackets, category: 'developer' },
   { id: 'dev-json', name: 'JSON Validator', description: 'Validate and format JSON data', icon: Brackets, category: 'developer' },
   { id: 'dev-css', name: 'CSS Minifier', description: 'Minify and optimize CSS code', icon: Palette, category: 'developer' },
@@ -124,7 +122,6 @@ export const TOOLS: Tool[] = [
   { id: 'util-uuid', name: 'UUID Generator', description: 'Generate unique identifiers (v4)', icon: Fingerprint, category: 'utility' },
   { id: 'util-time', name: 'Time Zone', description: 'Convert time across different zones', icon: Globe, category: 'utility', creditCost: 5 },
   { id: 'util-pass', name: 'Password Gen', description: 'Generate strong, secure passwords', icon: Shuffle, category: 'utility', isPopular: true, creditCost: 5 },
-  { id: 'util-pass-mgr', name: 'Advanced Password Manager', description: 'Generate, store, and manage secure passwords', icon: Lock, category: 'utility' },
   { id: 'util-file-enc', name: 'File Encryption', description: 'Securely encrypt and decrypt files', icon: LockIcon, category: 'utility' },
   { id: 'util-backup', name: 'Data Backup Tool', description: 'Automated cloud backup and sync', icon: Database, category: 'utility' },
   { id: 'util-morse', name: 'Morse Code Converter', description: 'Convert text to Morse code and vice versa', icon: Zap, category: 'utility' },
