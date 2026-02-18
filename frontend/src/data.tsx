@@ -90,7 +90,6 @@ export const TOOLS: Tool[] = [
   { id: 'txt-sort', name: 'Text Sorter', description: 'Sort list items alphabetically or numerically', icon: SortAsc, category: 'text' },
   { id: 'txt-rev', name: 'Text Reverser', description: 'Reverse text, words, or character order', icon: ArrowRightLeft, category: 'text' },
   { id: 'txt-enc', name: 'Text Encryptor', description: 'Securely encrypt and decrypt text data', icon: LockIcon, category: 'text' },
-  { id: 'txt-summ', name: 'AI Text Summarizer', description: 'Generate summaries from long text automatically', icon: FileText, category: 'text' },
   { id: 'txt-gram', name: 'Grammar Checker', description: 'Advanced proofreading and grammar correction', icon: Eye, category: 'text' },
   { id: 'txt-find', name: 'Find & Replace', description: 'Search and replace text with advanced options', icon: Search, category: 'text', creditCost: 3 },
   { id: 'txt-diff', name: 'Text Diff Checker', description: 'Compare two texts and highlight differences', icon: ArrowRightLeft, category: 'text' },

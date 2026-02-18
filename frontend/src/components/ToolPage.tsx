@@ -33,7 +33,6 @@ import GradientGenerator from './GradientGenerator';
 import ContrastChecker from './ContrastChecker';
 import KeywordDensity from './KeywordDensity';
 import MetaTagAnalyzer from './MetaTagAnalyzer';
-import TextSummarizer from './TextSummarizer';
 import GrammarChecker from './GrammarChecker';
 import FindReplace from './FindReplace';
 import TextDiffChecker from './TextDiffChecker';
@@ -182,8 +181,6 @@ const ToolPage: React.FC = () => {
             <KeywordDensity />
           ) : tool.id === 'seo-meta' ? (
             <MetaTagAnalyzer />
-          ) : tool.id === 'txt-summ' ? (
-            <TextSummarizer />
           ) : tool.id === 'txt-gram' ? (
             <GrammarChecker />
           ) : tool.id === 'txt-find' ? (
